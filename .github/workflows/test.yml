@@ -21,4 +21,7 @@ jobs:
         cache: 'maven'
         
     - name: Run Maven Tests
+      env:
+        RHESIS_API_KEY: ${{ secrets.RHESIS_API_KEY }}
+        RHESIS_BASE_URL: ${{ secrets.RHESIS_BASE_URL }}
       run: make test

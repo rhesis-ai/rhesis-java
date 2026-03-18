@@ -1,4 +1,4 @@
-# Rhesis Java SDK 🧠
+# Rhesis Java SDK ☕️
 
 <meta name="google-site-verification" content="muyrLNdeOT9KjYaOnfpOmGi8K5xPe8o7r_ov3kEGdXA" />
 
@@ -207,12 +207,21 @@ If none of the existing test sets fit your needs, you can generate your own. You
 
 Looking for more detailed examples? Check out our runnable examples in the [`src/test/java/com/rhesis/sdk/examples/`](src/test/java/com/rhesis/sdk/examples/) directory. These include:
 - [Creating an Endpoint](src/test/java/com/rhesis/sdk/examples/CreateEndpointExample.java)
+- [Generating a Test Set](src/test/java/com/rhesis/sdk/examples/GenerateTestSetExample.java)
 
-You can run these examples directly from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment or in a `.env` file at the root of the project:
+You can run these examples directly from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment (it will be automatically picked up from a `.env` file at the root of the project if one exists):
 
 ```bash
+# Ensure the examples are compiled
 mvn clean test-compile
+
+# Run the Create Endpoint example
 mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="com.rhesis.sdk.examples.CreateEndpointExample"
+```
+
+To run the multi-turn synthesizer example:
+```bash
+mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="com.rhesis.sdk.examples.GenerateTestSetExample"
 ```
 
 ## 🧪 About Rhesis AI
