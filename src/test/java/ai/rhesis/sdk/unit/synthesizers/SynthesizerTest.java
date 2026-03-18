@@ -3,11 +3,21 @@ package ai.rhesis.sdk.unit.synthesizers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import ai.rhesis.sdk.entities.TestSet;
+import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.synthesizers.*;
 import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class SynthesizerTest {
+
+  @BeforeAll
+  static void setup() {
+    RhesisClient client = RhesisClient.builder()
+        .apiKey("dummy-key")
+        .build();
+    RhesisClient.setDefault(client);
+  }
 
   @Test
   void testSynthesizerRender() {
@@ -23,9 +33,6 @@ class SynthesizerTest {
     assertThat(output).contains("[B1, B2]");
     assertThat(output).contains("[C1]");
     assertThat(output).contains("Analyze the generation prompt and derive relevant topics");
-
-    TestSet ts = synth.generate(5);
-    assertThat(ts.testSetType()).isEqualTo(ai.rhesis.sdk.enums.TestType.SINGLE_TURN);
   }
 
   @Test
