@@ -6,8 +6,8 @@
   <a href="https://github.com/rhesis-ai/rhesis-java/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
   </a>
-  <a href="https://search.maven.org/search?q=g:com.rhesis%20a:rhesis-java">
-    <img src="https://img.shields.io/maven-central/v/com.rhesis/rhesis-java.svg" alt="Maven Central">
+  <a href="https://search.maven.org/search?q=g:ai.rhesis%20a:rhesis-java">
+    <img src="https://img.shields.io/maven-central/v/ai.rhesis/rhesis-java.svg" alt="Maven Central">
   </a>
   <a href="https://openjdk.org/projects/jdk/21/">
     <img src="https://img.shields.io/badge/Java-21+-blue.svg" alt="Java Version">
@@ -148,7 +148,7 @@ The SDK is also published to GitHub Packages. You'll need to configure your buil
 
 <dependencies>
     <dependency>
-        <groupId>com.rhesis</groupId>
+        <groupId>ai.rhesis</groupId>
         <artifactId>rhesis-java</artifactId>
         <version>0.1.0</version>
     </dependency>
@@ -171,7 +171,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.rhesis:rhesis-java:0.1.0'
+    implementation 'ai.rhesis:rhesis-java:0.1.0'
 }
 ```
 
@@ -219,10 +219,10 @@ Your API key will be in the format `rh-XXXXXXXXXXXXXXXXXXXX`. Keep this key secu
 ### 2. Configure and Use the SDK 🛠️
 
 ```java
-import com.rhesis.sdk.RhesisClient;
-import com.rhesis.sdk.entities.TestSet;
-import com.rhesis.sdk.synthesizers.Synthesizer;
-import com.rhesis.sdk.synthesizers.GenerationConfig;
+import ai.rhesis.sdk.RhesisClient;
+import ai.rhesis.sdk.entities.TestSet;
+import ai.rhesis.sdk.synthesizers.Synthesizer;
+import ai.rhesis.sdk.synthesizers.GenerationConfig;
 import java.util.List;
 
 public class Main {
@@ -258,9 +258,9 @@ If none of the existing test sets fit your needs, you can generate your own. You
 
 ### Examples 💡
 
-Looking for more detailed examples? Check out our runnable examples in the [`src/test/java/com/rhesis/sdk/examples/`](src/test/java/com/rhesis/sdk/examples/) directory. These include:
-- [Creating an Endpoint](src/test/java/com/rhesis/sdk/examples/CreateEndpointExample.java)
-- [Generating a Test Set](src/test/java/com/rhesis/sdk/examples/GenerateTestSetExample.java)
+Looking for more detailed examples? Check out our runnable examples in the [`src/test/java/ai/rhesis/sdk/examples/`](src/test/java/ai/rhesis/sdk/examples/) directory. These include:
+- [Creating an Endpoint](src/test/java/ai/rhesis/sdk/examples/CreateEndpointExample.java)
+- [Generating a Test Set](src/test/java/ai/rhesis/sdk/examples/GenerateTestSetExample.java)
 
 You can run these examples directly from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment (it will be automatically picked up from a `.env` file at the root of the project if one exists):
 
@@ -269,12 +269,12 @@ You can run these examples directly from the command line using Maven. Make sure
 mvn clean test-compile
 
 # Run the Create Endpoint example
-mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="com.rhesis.sdk.examples.CreateEndpointExample"
+mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="ai.rhesis.sdk.examples.CreateEndpointExample"
 ```
 
 To run the multi-turn synthesizer example:
 ```bash
-mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="com.rhesis.sdk.examples.GenerateTestSetExample"
+mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="ai.rhesis.sdk.examples.GenerateTestSetExample"
 ```
 
 ## 🧪 About Rhesis AI
