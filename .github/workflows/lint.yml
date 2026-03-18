@@ -1,4 +1,4 @@
-name: Test
+name: Lint
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
-    name: Run Tests
+  lint:
+    name: Check Code Format
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -20,5 +20,5 @@ jobs:
         distribution: 'temurin'
         cache: 'maven'
         
-    - name: Run Maven Tests
-      run: ./mvnw test
+    - name: Run Spotless Check
+      run: ./mvnw spotless:check
