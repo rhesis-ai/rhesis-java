@@ -2,7 +2,6 @@ package ai.rhesis.sdk.unit.synthesizers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ai.rhesis.sdk.entities.TestSet;
 import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.synthesizers.*;
 import java.util.List;
@@ -13,9 +12,7 @@ class SynthesizerTest {
 
   @BeforeAll
   static void setup() {
-    RhesisClient client = RhesisClient.builder()
-        .apiKey("dummy-key")
-        .build();
+    RhesisClient client = RhesisClient.builder().apiKey("dummy-key").build();
     RhesisClient.setDefault(client);
   }
 

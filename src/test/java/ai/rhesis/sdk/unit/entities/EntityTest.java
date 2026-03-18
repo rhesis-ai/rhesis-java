@@ -2,9 +2,9 @@ package ai.rhesis.sdk.unit.entities;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ai.rhesis.sdk.entities.*;
 import ai.rhesis.sdk.enums.TestType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -41,8 +41,7 @@ class EntityTest {
     String json = mapper.writeValueAsString(test);
     assertThat(json).contains("\"test_type\":\"Single-Turn\"");
 
-    ai.rhesis.sdk.entities.Test parsed =
-        mapper.readValue(json, ai.rhesis.sdk.entities.Test.class);
+    ai.rhesis.sdk.entities.Test parsed = mapper.readValue(json, ai.rhesis.sdk.entities.Test.class);
     assertThat(parsed.id()).isEqualTo("test-1");
     assertThat(parsed.testType()).isEqualTo(TestType.SINGLE_TURN);
   }

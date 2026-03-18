@@ -1,8 +1,8 @@
 package ai.rhesis.sdk.clients;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import ai.rhesis.sdk.entities.Project;
 import ai.rhesis.sdk.http.InternalHttpClient;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;

@@ -1,7 +1,5 @@
 package ai.rhesis.sdk.synthesizers;
 
-import com.hubspot.jinjava.Jinjava;
-import com.hubspot.jinjava.loader.ResourceLocator;
 import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.entities.Prompt;
 import ai.rhesis.sdk.entities.Test;
@@ -10,6 +8,8 @@ import ai.rhesis.sdk.enums.TestType;
 import ai.rhesis.sdk.models.ChatModelClient;
 import ai.rhesis.sdk.models.ChatRequest;
 import ai.rhesis.sdk.models.ChatResponse;
+import com.hubspot.jinjava.Jinjava;
+import com.hubspot.jinjava.loader.ResourceLocator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

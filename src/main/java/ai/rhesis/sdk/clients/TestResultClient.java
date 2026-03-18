@@ -1,8 +1,8 @@
 package ai.rhesis.sdk.clients;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import ai.rhesis.sdk.entities.TestResult;
 import ai.rhesis.sdk.http.InternalHttpClient;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 
 public class TestResultClient {

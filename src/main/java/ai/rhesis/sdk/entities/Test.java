@@ -1,8 +1,8 @@
 package ai.rhesis.sdk.entities;
 
+import ai.rhesis.sdk.enums.TestType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ai.rhesis.sdk.enums.TestType;
 import java.util.List;
 import java.util.Map;
 

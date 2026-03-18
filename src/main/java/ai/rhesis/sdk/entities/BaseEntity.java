@@ -1,11 +1,11 @@
 package ai.rhesis.sdk.entities;
 
+import ai.rhesis.sdk.RhesisClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import ai.rhesis.sdk.RhesisClient;
 import java.util.Map;
 
 public interface BaseEntity<T extends BaseEntity<T>> {

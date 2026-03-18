@@ -3,8 +3,6 @@ package ai.rhesis.sdk.unit.clients;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.clients.*;
 import ai.rhesis.sdk.entities.File;
@@ -13,6 +11,8 @@ import ai.rhesis.sdk.entities.TestRun;
 import ai.rhesis.sdk.entities.TestSet;
 import ai.rhesis.sdk.enums.RunStatus;
 import ai.rhesis.sdk.enums.TestType;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

@@ -1,8 +1,8 @@
 package ai.rhesis.sdk.entities;
 
+import ai.rhesis.sdk.enums.ConnectionType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ai.rhesis.sdk.enums.ConnectionType;
 import java.util.Map;
 
 public record Endpoint(
