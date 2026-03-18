@@ -1,4 +1,10 @@
-# Compiled class file
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Build
+target/
 *.class
 
 # Log file
@@ -26,3 +32,4 @@ replay_pid*
 # sdk
 sdk.env
 .env
+
