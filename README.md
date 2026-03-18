@@ -30,6 +30,8 @@
 
 The Rhesis Java SDK empowers developers to programmatically access curated test sets and generate comprehensive test scenarios for Gen AI applications. Transform domain expertise into automated testing: access thousands of test scenarios, generate custom validation suites, and integrate seamlessly into your workflow to keep your Gen AI robust, reliable & compliant.
 
+> **⚠️ Note:** The Java SDK is currently in early development and represents a subset of the Python SDK. It covers basic functionality including test set retrieval and programmatic scenario generation. For advanced evaluation metrics, adaptive testing, and full CI/CD integrations, please refer to our [Python SDK](https://github.com/rhesis-ai/rhesis).
+
 <img src="https://cdn.prod.website-files.com/68c3e3b148a4fd9bcf76eb6a/68d66fa1ff10c81d4e4e4d0f_Frame%201000004352.png"
      loading="lazy"
      width="1392"
