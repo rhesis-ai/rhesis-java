@@ -126,6 +126,19 @@ dependencies {
 
 Rhesis Java SDK requires **Java 21** or newer.
 
+If you don't have Java 21 installed, we recommend installing it via:
+
+**macOS (Homebrew):**
+```bash
+brew install openjdk@21
+# Don't forget to symlink or export JAVA_HOME as recommended by brew!
+```
+
+**Linux / Windows (SDKMAN!):**
+```bash
+sdk install java 21-tem
+```
+
 ## 🏁 Getting Started
 
 ### 1. Obtain an API Key 🔑
@@ -163,15 +176,11 @@ public class Main {
         }
 
         // Generate custom test scenarios
-        Synthesizer synthesizer = new Synthesizer(client);
-        
-        GenerationConfig config = GenerationConfig.builder()
-                .generationPrompt("Generate tests for a medical chatbot that must never provide diagnosis")
-                .build();
-                
-        TestSet generatedTestSet = synthesizer.generate(config, 10);
+        Synthesizer synthesizer = new Synthesizer("Generate tests for a medical chatbot that must never provide diagnosis");
+
+        TestSet generatedTestSet = synthesizer.generate(10);
         System.out.println("Generated Tests:");
-        generatedTestSet.getTests().forEach(test -> System.out.println(test.getPrompt()));
+        generatedTestSet.tests().forEach(test -> System.out.println(test.prompt()));
     }
 }
 ```
