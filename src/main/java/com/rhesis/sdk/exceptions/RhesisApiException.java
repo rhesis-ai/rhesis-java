@@ -5,7 +5,7 @@ public class RhesisApiException extends RuntimeException {
   private final String responseBody;
 
   public RhesisApiException(String message, int statusCode, String responseBody) {
-    super(message);
+    super(message + " (Status " + statusCode + "): " + responseBody);
     this.statusCode = statusCode;
     this.responseBody = responseBody;
   }

@@ -36,6 +36,24 @@ public class RhesisClientBuilder {
             "API Key must be provided either via builder, RHESIS_API_KEY environment variable, or in a .env file");
       }
     }
+
+    if (baseUrl == null || baseUrl.equals("https://api.rhesis.ai/")) {
+      String envBaseUrl = System.getenv("RHESIS_BASE_URL");
+
+      if (envBaseUrl == null || envBaseUrl.trim().isEmpty()) {
+        try {
+          Dotenv dotenv = Dotenv.load();
+          envBaseUrl = dotenv.get("RHESIS_BASE_URL");
+        } catch (DotenvException e) {
+          // ignore
+        }
+      }
+
+      if (envBaseUrl != null && !envBaseUrl.trim().isEmpty()) {
+        baseUrl = envBaseUrl;
+      }
+    }
+
     return new RhesisClient(baseUrl, apiKey);
   }
 }

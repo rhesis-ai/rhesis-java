@@ -9,25 +9,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Synthesizer extends BaseSynthesizer {
+public class PromptSynthesizer extends BaseSynthesizer {
   private final GenerationConfig config;
 
-  public Synthesizer(GenerationConfig config, ChatModelClient modelClient, int batchSize) {
+  public PromptSynthesizer(GenerationConfig config, ChatModelClient modelClient, int batchSize) {
     super(modelClient, batchSize);
     this.config = config;
   }
 
-  public Synthesizer(GenerationConfig config, int batchSize) {
+  public PromptSynthesizer(GenerationConfig config, int batchSize) {
     this(config, null, batchSize);
   }
 
-  public Synthesizer(GenerationConfig config) {
+  public PromptSynthesizer(GenerationConfig config) {
     this(config, null, 20);
   }
 
   // Backwards compatibility constructor
-  public Synthesizer(String prompt) {
-    this(GenerationConfig.builder().generationPrompt(prompt).build(), null, 20);
+  public PromptSynthesizer(String prompt, int batchSize) {
+    this(GenerationConfig.builder().generationPrompt(prompt).build(), null, batchSize);
+  }
+
+  public PromptSynthesizer(String prompt) {
+    this(prompt, 20);
   }
 
   @Override
@@ -49,24 +53,15 @@ public class Synthesizer extends BaseSynthesizer {
         context.put("topics", config.getTopics());
         context.put("num_tests", currentBatchSize);
 
-        String renderedPrompt = renderTemplate("synthesizer.jinja", context);
+        String renderedPrompt = renderTemplate("prompt_synthesizer.jinja", context);
         generatedTests.addAll(generateSingleTurnBatch(renderedPrompt));
     }
 
     return new TestSet(
         null,
         "Synthesized TestSet",
-        "Generated with Synthesizer based on prompt: " + config.getGenerationPrompt(),
+        "Generated with PromptSynthesizer based on prompt: " + config.getGenerationPrompt(),
         TestType.SINGLE_TURN,
         generatedTests);
-  }
-
-  public String getRenderedPrompt() {
-    Map<String, Object> context = new HashMap<>();
-    context.put("generation_prompt", config.getGenerationPrompt());
-    context.put("behaviors", config.getBehaviors());
-    context.put("categories", config.getCategories());
-    context.put("topics", config.getTopics());
-    return renderTemplate("synthesizer.jinja", context);
   }
 }

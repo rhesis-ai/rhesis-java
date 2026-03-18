@@ -1,10 +1,8 @@
 package com.rhesis.sdk.models;
 
-import com.rhesis.sdk.models.ChatRequest;
-import com.rhesis.sdk.models.ChatResponse;
 import com.rhesis.sdk.http.InternalHttpClient;
 
-public class RhesisNativeModelClient {
+public class RhesisNativeModelClient implements ChatModelClient {
   private final InternalHttpClient httpClient;
 
   public RhesisNativeModelClient(InternalHttpClient httpClient) {
@@ -12,6 +10,6 @@ public class RhesisNativeModelClient {
   }
 
   public ChatResponse chat(ChatRequest request) {
-    return httpClient.post("/chat/completions", request, ChatResponse.class);
+    return httpClient.post("/services/generate/content", request, ChatResponse.class);
   }
 }

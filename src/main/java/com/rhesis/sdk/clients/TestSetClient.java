@@ -2,6 +2,8 @@ package com.rhesis.sdk.clients;
 
 import com.rhesis.sdk.entities.TestSet;
 import com.rhesis.sdk.http.InternalHttpClient;
+import java.util.List;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 public class TestSetClient {
   private final InternalHttpClient httpClient;
@@ -11,10 +13,18 @@ public class TestSetClient {
   }
 
   public TestSet get(String id) {
-    return httpClient.get("/test-sets/" + id, TestSet.class);
+    return httpClient.get("/test_sets/" + id, TestSet.class);
+  }
+
+  public List<TestSet> list() {
+    return httpClient.get("/test_sets/", new TypeReference<List<TestSet>>() {});
   }
 
   public TestSet create(TestSet testSet) {
-    return httpClient.post("/test-sets", testSet, TestSet.class);
+    return httpClient.post("/test_sets/bulk", testSet, TestSet.class);
+  }
+
+  public void delete(String id) {
+    httpClient.delete("/test_sets/" + id);
   }
 }

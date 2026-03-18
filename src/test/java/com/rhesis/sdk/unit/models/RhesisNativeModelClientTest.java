@@ -1,13 +1,12 @@
-package com.rhesis.sdk.models;
+package com.rhesis.sdk.unit.models;
 
+import com.rhesis.sdk.models.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.rhesis.sdk.RhesisClient;
-import com.rhesis.sdk.models.ChatRequest;
-import com.rhesis.sdk.models.ChatResponse;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,7 +24,7 @@ class RhesisNativeModelClientTest {
     WireMock.configureFor("localhost", 8090);
 
     RhesisClient rhesisClient =
-        RhesisClient.builder().baseUrl("http://localhost:8090/v1").apiKey("test-key").build();
+        RhesisClient.builder().baseUrl("http://localhost:8090").apiKey("test-key").build();
     client = rhesisClient.models();
   }
 
@@ -39,23 +38,24 @@ class RhesisNativeModelClientTest {
     String jsonResponse =
         """
                 {
-                  "id": "chatcmpl-123",
-                  "model": "rhesis-model-v1",
-                  "choices": [
+                  "tests": [
                     {
-                      "index": 0,
-                      "message": {
-                        "role": "assistant",
-                        "content": "Hello, world!"
-                      },
-                      "finish_reason": "stop"
+                      "test_configuration_goal": "Goal",
+                      "test_configuration_instructions": "Instructions",
+                      "test_configuration_restrictions": "Restrictions",
+                      "test_configuration_scenario": "Scenario",
+                      "test_configuration_min_turns": 1,
+                      "test_configuration_max_turns": 3,
+                      "behavior": "Behavior 1",
+                      "category": "Category 1",
+                      "topic": "Topic 1"
                     }
                   ]
                 }
                 """;
 
     stubFor(
-        post(urlEqualTo("/v1/chat/completions"))
+        post(urlEqualTo("/services/generate/content"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .withHeader("Content-Type", containing("application/json"))
             .willReturn(
@@ -66,15 +66,10 @@ class RhesisNativeModelClientTest {
 
     ChatRequest request =
         new ChatRequest(
-            "rhesis-model-v1", List.of(new ChatRequest.Message("user", "Say hello")), 0.7, 100);
+            "Say hello", 0.7, 100, null);
 
     ChatResponse response = client.chat(request);
 
-    assertThat(response.id()).isEqualTo("chatcmpl-123");
-    assertThat(response.model()).isEqualTo("rhesis-model-v1");
-    assertThat(response.choices()).hasSize(1);
-    assertThat(response.choices().get(0).message().content()).isEqualTo("Hello, world!");
-    assertThat(response.choices().get(0).message().role()).isEqualTo("assistant");
-    assertThat(response.choices().get(0).finishReason()).isEqualTo("stop");
+    assertThat(response.getProperties()).containsKey("tests");
   }
 }

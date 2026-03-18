@@ -1,5 +1,6 @@
-package com.rhesis.sdk;
+package com.rhesis.sdk.unit;
 
+import com.rhesis.sdk.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;

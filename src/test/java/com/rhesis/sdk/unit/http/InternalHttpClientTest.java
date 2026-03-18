@@ -1,5 +1,6 @@
-package com.rhesis.sdk.http;
+package com.rhesis.sdk.unit.http;
 
+import com.rhesis.sdk.http.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -21,7 +22,7 @@ class InternalHttpClientTest {
     wireMockServer.start();
     WireMock.configureFor("localhost", 8091);
 
-    client = new InternalHttpClient("http://localhost:8091/v1", "test-key");
+    client = new InternalHttpClient("http://localhost:8091", "test-key");
   }
 
   @AfterAll
@@ -34,7 +35,7 @@ class InternalHttpClientTest {
     String errorJson = "{\"error\": \"Unauthorized\", \"message\": \"Invalid API key\"}";
 
     stubFor(
-        get(urlEqualTo("/v1/test-endpoint"))
+        get(urlEqualTo("/test-endpoint"))
             .willReturn(
                 aResponse()
                     .withStatus(401)
@@ -43,7 +44,7 @@ class InternalHttpClientTest {
 
     assertThatThrownBy(() -> client.get("/test-endpoint", Object.class))
         .isInstanceOf(RhesisApiException.class)
-        .hasMessage("API request failed")
+        .hasMessageStartingWith("API request failed")
         .satisfies(
             e -> {
               RhesisApiException apiException = (RhesisApiException) e;
@@ -57,12 +58,12 @@ class InternalHttpClientTest {
   @Test
   void testServerErrorHandling() {
     stubFor(
-        get(urlEqualTo("/v1/test-endpoint"))
+        get(urlEqualTo("/test-endpoint"))
             .willReturn(aResponse().withStatus(500).withBody("Internal Server Error")));
 
     assertThatThrownBy(() -> client.get("/test-endpoint", Object.class))
         .isInstanceOf(RhesisApiException.class)
-        .hasMessage("API request failed")
+        .hasMessageStartingWith("API request failed")
         .satisfies(
             e -> {
               RhesisApiException apiException = (RhesisApiException) e;

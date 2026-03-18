@@ -2,15 +2,11 @@ package com.rhesis.sdk.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import java.util.List;
+import java.util.Map;
 
 public record ChatRequest(
-    @NotBlank @JsonProperty("model") String model,
-    @NotEmpty @JsonProperty("messages") List<Message> messages,
+    @NotBlank @JsonProperty("prompt") String prompt,
     @JsonProperty("temperature") Double temperature,
-    @JsonProperty("max_tokens") Integer maxTokens) {
-  public record Message(
-      @NotBlank @JsonProperty("role") String role,
-      @NotBlank @JsonProperty("content") String content) {}
+    @JsonProperty("max_tokens") Integer maxTokens,
+    @JsonProperty("schema") Map<String, Object> schema) {
 }

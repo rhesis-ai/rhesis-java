@@ -1,17 +1,19 @@
 package com.rhesis.sdk.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import java.util.HashMap;
+import java.util.Map;
 
-public record ChatResponse(
-    @JsonProperty("id") String id,
-    @JsonProperty("model") String model,
-    @JsonProperty("choices") List<Choice> choices) {
-  public record Choice(
-      @JsonProperty("index") Integer index,
-      @JsonProperty("message") Message message,
-      @JsonProperty("finish_reason") String finishReason) {}
+// The backend returns a direct JSON map of the parsed schema when using schema generation
+public class ChatResponse {
+    private final Map<String, Object> properties = new HashMap<>();
 
-  public record Message(
-      @JsonProperty("role") String role, @JsonProperty("content") String content) {}
+    @JsonAnySetter
+    public void addProperty(String name, Object value) {
+        properties.put(name, value);
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
 }

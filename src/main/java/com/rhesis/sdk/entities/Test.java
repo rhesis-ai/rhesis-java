@@ -1,5 +1,6 @@
 package com.rhesis.sdk.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rhesis.sdk.enums.TestType;
 import java.util.List;
@@ -14,4 +15,11 @@ public record Test(
     @JsonProperty("test_type") TestType testType,
     @JsonProperty("prompt") Prompt prompt,
     @JsonProperty("metadata") Map<String, Object> metadata,
-    @JsonProperty("files") List<String> files) {}
+    @JsonProperty("files") List<String> files) implements BaseEntity<Test> {
+
+    @JsonIgnore
+    @Override
+    public String getEndpointPath() {
+        return "/tests";
+    }
+}

@@ -1,13 +1,12 @@
-package com.rhesis.sdk.synthesizers;
+package com.rhesis.sdk.unit.synthesizers;
 
+import com.rhesis.sdk.synthesizers.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.rhesis.sdk.RhesisClient;
-import com.rhesis.sdk.synthesizers.SynthesizerConfig;
-import com.rhesis.sdk.synthesizers.SynthesizerResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ class SynthesizerClientTest {
     WireMock.configureFor("localhost", 8089);
 
     RhesisClient rhesisClient =
-        RhesisClient.builder().baseUrl("http://localhost:8089/v1").apiKey("test-key").build();
+        RhesisClient.builder().baseUrl("http://localhost:8089").apiKey("test-key").build();
     client = rhesisClient.synthesizers();
   }
 
@@ -36,7 +35,7 @@ class SynthesizerClientTest {
   @Test
   void testCreateSynthesizer() {
     stubFor(
-        post(urlEqualTo("/v1/synthesizers"))
+        post(urlEqualTo("/synthesizers/"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
@@ -56,7 +55,7 @@ class SynthesizerClientTest {
   @Test
   void testGetSynthesizer() {
     stubFor(
-        get(urlEqualTo("/v1/synthesizers/synth-123"))
+        get(urlEqualTo("/synthesizers/synth-123"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()

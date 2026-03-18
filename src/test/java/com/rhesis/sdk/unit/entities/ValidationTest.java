@@ -1,5 +1,6 @@
-package com.rhesis.sdk.entities;
+package com.rhesis.sdk.unit.entities;
 
+import com.rhesis.sdk.entities.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.rhesis.sdk.models.ChatRequest;
@@ -27,16 +28,16 @@ class ValidationTest {
   void testChatRequestValidation() {
     ChatRequest validRequest =
         new ChatRequest(
-            "model-id",
-            Collections.singletonList(new ChatRequest.Message("user", "Hello")),
+            "Hello",
             0.7,
-            100);
+            100,
+            null);
     Set<ConstraintViolation<ChatRequest>> violations = validator.validate(validRequest);
     assertThat(violations).isEmpty();
 
-    ChatRequest invalidRequest = new ChatRequest("", Collections.emptyList(), null, null);
+    ChatRequest invalidRequest = new ChatRequest("", null, null, null);
     violations = validator.validate(invalidRequest);
-    assertThat(violations).hasSize(2);
+    assertThat(violations).hasSize(1);
   }
 
   @Test

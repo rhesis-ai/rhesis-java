@@ -71,6 +71,73 @@ public class InternalHttpClient {
     }
   }
 
+
+  public <T, R> R put(String path, T requestBody, Class<R> responseType) {
+    validate(requestBody);
+    try {
+      String jsonBody = objectMapper.writeValueAsString(requestBody);
+      HttpRequest request =
+          HttpRequest.newBuilder()
+              .uri(URI.create(baseUrl + path))
+              .header("Content-Type", "application/json")
+              .header("Authorization", "Bearer " + apiKey)
+              .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+              .build();
+      return executeRequest(request, responseType);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to serialize request body", e);
+    }
+  }
+
+  public <R> R get(String path, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
+    HttpRequest request =
+        HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + path))
+            .header("Authorization", "Bearer " + apiKey)
+            .GET()
+            .build();
+
+    return executeRequest(request, responseType);
+  }
+
+  public <T, R> R post(String path, T requestBody, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
+    validate(requestBody);
+    try {
+      String jsonBody = objectMapper.writeValueAsString(requestBody);
+      HttpRequest request =
+          HttpRequest.newBuilder()
+              .uri(URI.create(baseUrl + path))
+              .header("Content-Type", "application/json")
+              .header("Authorization", "Bearer " + apiKey)
+              .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+              .build();
+      return executeRequest(request, responseType);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException("Failed to serialize request body", e);
+    }
+  }
+
+  public void delete(String path) {
+    HttpRequest request =
+        HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + path))
+            .header("Authorization", "Bearer " + apiKey)
+            .DELETE()
+            .build();
+
+    try {
+      HttpResponse<String> response =
+          httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() >= 400) {
+        throw new RhesisApiException("API request failed", response.statusCode(), response.body());
+      }
+    } catch (IOException | InterruptedException e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
+      throw new RuntimeException("Failed to execute request", e);
+    }
+  }
   public <R> R get(String path, Class<R> responseType) {
     HttpRequest request =
         HttpRequest.newBuilder()
@@ -82,8 +149,38 @@ public class InternalHttpClient {
     return executeRequest(request, responseType);
   }
 
+
+  private <R> R executeRequest(HttpRequest request, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
+    try {
+      HttpResponse<String> response =
+          httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+      if (response.statusCode() >= 400) {
+        throw new RhesisApiException("API request failed", response.statusCode(), response.body());
+      }
+
+      R result = objectMapper.readValue(response.body(), responseType);
+      validate(result);
+      return result;
+
+    } catch (IOException | InterruptedException e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
+      throw new RuntimeException("Failed to execute request", e);
+    }
+  }
   private <R> R executeRequest(HttpRequest request, Class<R> responseType) {
     try {
+      if (responseType == byte[].class) {
+        HttpResponse<byte[]> response =
+            httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        if (response.statusCode() >= 400) {
+          throw new RhesisApiException("API request failed", response.statusCode(), new String(response.body()));
+        }
+        return responseType.cast(response.body());
+      }
+
       HttpResponse<String> response =
           httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
