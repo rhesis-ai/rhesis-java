@@ -179,7 +179,9 @@ public class InternalHttpClient {
             httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
         if (response.statusCode() >= 400) {
           throw new RhesisApiException(
-              "API request failed", response.statusCode(), new String(response.body()));
+              "API request failed",
+              response.statusCode(),
+              new String(response.body(), java.nio.charset.StandardCharsets.UTF_8));
         }
         return responseType.cast(response.body());
       }

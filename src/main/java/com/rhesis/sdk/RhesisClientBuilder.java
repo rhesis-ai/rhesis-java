@@ -1,7 +1,6 @@
 package com.rhesis.sdk;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import io.github.cdimascio.dotenv.DotenvException;
 
 public class RhesisClientBuilder {
   private String apiKey;
@@ -23,12 +22,8 @@ public class RhesisClientBuilder {
 
       // Fallback to .env file if system env is not set
       if (apiKey == null || apiKey.trim().isEmpty()) {
-        try {
-          Dotenv dotenv = Dotenv.load();
-          apiKey = dotenv.get("RHESIS_API_KEY");
-        } catch (DotenvException e) {
-          // .env file might not exist, which is fine, we just fall through to the error
-        }
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        apiKey = dotenv.get("RHESIS_API_KEY");
       }
 
       if (apiKey == null || apiKey.trim().isEmpty()) {
@@ -41,12 +36,8 @@ public class RhesisClientBuilder {
       String envBaseUrl = System.getenv("RHESIS_BASE_URL");
 
       if (envBaseUrl == null || envBaseUrl.trim().isEmpty()) {
-        try {
-          Dotenv dotenv = Dotenv.load();
-          envBaseUrl = dotenv.get("RHESIS_BASE_URL");
-        } catch (DotenvException e) {
-          // ignore
-        }
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        envBaseUrl = dotenv.get("RHESIS_BASE_URL");
       }
 
       if (envBaseUrl != null && !envBaseUrl.trim().isEmpty()) {

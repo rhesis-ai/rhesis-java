@@ -23,7 +23,6 @@ class ClientWiremockTest {
   private static TestClient testClient;
   private static TestSetClient testSetClient;
   private static TestRunClient testRunClient;
-  private static TestResultClient testResultClient;
   private static FileClient fileClient;
 
   @BeforeAll
@@ -37,7 +36,6 @@ class ClientWiremockTest {
     testClient = rhesisClient.tests();
     testSetClient = rhesisClient.testSets();
     testRunClient = rhesisClient.testRuns();
-    testResultClient = rhesisClient.testResults();
     fileClient = rhesisClient.files();
   }
 
@@ -142,6 +140,7 @@ class ClientWiremockTest {
                     .withBody("hello world")));
 
     byte[] response = fileClient.download("file-123");
-    assertThat(new String(response)).isEqualTo("hello world");
+    assertThat(new String(response, java.nio.charset.StandardCharsets.UTF_8))
+        .isEqualTo("hello world");
   }
 }

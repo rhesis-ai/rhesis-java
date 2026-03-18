@@ -9,6 +9,7 @@ public class RhesisNativeModelClient implements ChatModelClient {
     this.httpClient = httpClient;
   }
 
+  @Override
   public ChatResponse chat(ChatRequest request) {
     return httpClient.post("/services/generate/content", request, ChatResponse.class);
   }

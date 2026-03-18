@@ -24,7 +24,8 @@ public class ProjectClient {
     }
 
     String encodedName =
-        URLEncoder.encode(name.toLowerCase(), StandardCharsets.UTF_8).replace("+", "%20");
+        URLEncoder.encode(name.toLowerCase(java.util.Locale.ROOT), StandardCharsets.UTF_8)
+            .replace("+", "%20");
     String filter = "?$filter=tolower(name)%20eq%20'" + encodedName + "'";
 
     List<Project> projects =

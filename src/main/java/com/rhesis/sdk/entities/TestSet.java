@@ -39,7 +39,7 @@ public record TestSet(
 
       if (value != null) {
         // Convert "Multi-Turn" to "MULTI_TURN" etc to match the Java Enum names
-        String normalized = value.toUpperCase().replace("-", "_");
+        String normalized = value.toUpperCase(java.util.Locale.ROOT).replace("-", "_");
         try {
           return TestType.valueOf(normalized);
         } catch (IllegalArgumentException e) {
