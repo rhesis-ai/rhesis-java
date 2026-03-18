@@ -175,8 +175,9 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        // Initialize the client. The API key can also be picked up from 
+        // Initialize the client. The API key can also be picked up from
         // the RHESIS_API_KEY environment variable or a .env file.
+        // You can also override the base URL via RHESIS_BASE_URL.
         RhesisClient client = RhesisClient.builder()
                 .apiKey("rh-your-api-key") // Get from app.rhesis.ai settings
                 .build();
