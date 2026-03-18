@@ -1,13 +1,12 @@
 package com.rhesis.sdk.unit.models;
 
-import com.rhesis.sdk.models.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.rhesis.sdk.RhesisClient;
-import java.util.List;
+import com.rhesis.sdk.models.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,9 +63,7 @@ class RhesisNativeModelClientTest {
                     .withHeader("Content-Type", "application/json")
                     .withBody(jsonResponse)));
 
-    ChatRequest request =
-        new ChatRequest(
-            "Say hello", 0.7, 100, null);
+    ChatRequest request = new ChatRequest("Say hello", 0.7, 100, null);
 
     ChatResponse response = client.chat(request);
 

@@ -34,17 +34,20 @@ public abstract class BaseIntegrationTest {
       baseUrl = System.getenv("RHESIS_BASE_URL");
     }
 
-    assumeTrue(apiKey != null && !apiKey.isEmpty(), "RHESIS_API_KEY is not set. Skipping integration tests.");
+    assumeTrue(
+        apiKey != null && !apiKey.isEmpty(),
+        "RHESIS_API_KEY is not set. Skipping integration tests.");
 
-    client = RhesisClient.builder()
-        .apiKey(apiKey)
-        .baseUrl(baseUrl != null ? baseUrl : "https://api.rhesis.ai")
-        .build();
+    client =
+        RhesisClient.builder()
+            .apiKey(apiKey)
+            .baseUrl(baseUrl != null ? baseUrl : "https://api.rhesis.ai")
+            .build();
 
     try {
       List<Project> projects = client.projects().list();
       if (!projects.isEmpty()) {
-          defaultProjectId = projects.get(0).id();
+        defaultProjectId = projects.get(0).id();
       }
     } catch (Exception e) {
       System.err.println("Could not fetch projects: " + e.getMessage());

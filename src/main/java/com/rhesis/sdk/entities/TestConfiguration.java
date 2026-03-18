@@ -10,7 +10,8 @@ public record TestConfiguration(
     @JsonProperty("restrictions") String restrictions,
     @JsonProperty("scenario") String scenario,
     @JsonProperty("max_turns") Integer maxTurns,
-    @JsonProperty("min_turns") Integer minTurns) implements BaseEntity<TestConfiguration> {
+    @JsonProperty("min_turns") Integer minTurns)
+    implements BaseEntity<TestConfiguration> {
 
   public TestConfiguration {
     if (instructions == null) instructions = "";

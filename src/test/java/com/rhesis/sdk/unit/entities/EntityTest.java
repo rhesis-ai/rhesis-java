@@ -1,9 +1,9 @@
 package com.rhesis.sdk.unit.entities;
 
-import com.rhesis.sdk.entities.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rhesis.sdk.entities.*;
 import com.rhesis.sdk.enums.TestType;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +124,17 @@ class EntityTest {
 
   @Test
   void testTestRunSerialization() throws Exception {
-    TestRun testRun = new TestRun("run-1", "config-1", "My Run", "user-1", "org-1", com.rhesis.sdk.enums.RunStatus.COMPLETED, Map.of("k", "v"), "owner-1", "assignee-1");
+    TestRun testRun =
+        new TestRun(
+            "run-1",
+            "config-1",
+            "My Run",
+            "user-1",
+            "org-1",
+            com.rhesis.sdk.enums.RunStatus.COMPLETED,
+            Map.of("k", "v"),
+            "owner-1",
+            "assignee-1");
     String json = mapper.writeValueAsString(testRun);
     TestRun parsed = mapper.readValue(json, TestRun.class);
     assertThat(parsed.id()).isEqualTo("run-1");
@@ -134,7 +144,18 @@ class EntityTest {
   @Test
   void testTestResultSerialization() throws Exception {
     Status status = new Status("status-1", "Passed", "Test passed");
-    TestResult result = new TestResult("res-1", "config-1", "run-1", "prompt-1", "test-1", "status-1", status, Map.of("out", "val"), Map.of("score", 1.0), Map.of("rev", "good"));
+    TestResult result =
+        new TestResult(
+            "res-1",
+            "config-1",
+            "run-1",
+            "prompt-1",
+            "test-1",
+            "status-1",
+            status,
+            Map.of("out", "val"),
+            Map.of("score", 1.0),
+            Map.of("rev", "good"));
     String json = mapper.writeValueAsString(result);
     TestResult parsed = mapper.readValue(json, TestResult.class);
     assertThat(parsed.id()).isEqualTo("res-1");

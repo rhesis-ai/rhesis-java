@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public record Status(
     @JsonProperty("id") String id,
     @JsonProperty("name") String name,
-    @JsonProperty("description") String description) implements BaseEntity<Status> {
+    @JsonProperty("description") String description)
+    implements BaseEntity<Status> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/statuses";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/statuses";
+  }
 }

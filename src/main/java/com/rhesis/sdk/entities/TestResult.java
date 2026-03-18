@@ -14,11 +14,12 @@ public record TestResult(
     @JsonProperty("status") Status status,
     @JsonProperty("test_output") Map<String, Object> testOutput,
     @JsonProperty("test_metrics") Map<String, Object> testMetrics,
-    @JsonProperty("test_reviews") Map<String, Object> testReviews) implements BaseEntity<TestResult> {
+    @JsonProperty("test_reviews") Map<String, Object> testReviews)
+    implements BaseEntity<TestResult> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/test_results";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/test_results";
+  }
 }

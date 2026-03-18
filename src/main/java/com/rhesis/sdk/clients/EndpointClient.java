@@ -1,10 +1,10 @@
 package com.rhesis.sdk.clients;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.rhesis.sdk.entities.Endpoint;
 import com.rhesis.sdk.http.InternalHttpClient;
 import java.util.List;
 import java.util.Map;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 public class EndpointClient {
   private final InternalHttpClient httpClient;
@@ -35,6 +35,7 @@ public class EndpointClient {
     if (conversationId != null) {
       body.put("conversation_id", conversationId);
     }
-    return httpClient.post("/endpoints/" + id + "/invoke", body, new TypeReference<Map<String, Object>>() {});
+    return httpClient.post(
+        "/endpoints/" + id + "/invoke", body, new TypeReference<Map<String, Object>>() {});
   }
 }

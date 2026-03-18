@@ -25,15 +25,20 @@ public abstract class BaseSynthesizer {
   public BaseSynthesizer(ChatModelClient modelClient, int batchSize) {
     this.modelClient = modelClient != null ? modelClient : RhesisClient.getDefault().models();
     this.jinjava = new Jinjava();
-    this.jinjava.setResourceLocator(new ResourceLocator() {
-      @Override
-      public String getString(String fullName, java.nio.charset.Charset encoding, com.hubspot.jinjava.interpret.JinjavaInterpreter interpreter) throws IOException {
-        try (InputStream is = getClass().getResourceAsStream("/templates/" + fullName)) {
-          if (is == null) throw new IOException("Template not found: " + fullName);
-          return new String(is.readAllBytes(), encoding);
-        }
-      }
-    });
+    this.jinjava.setResourceLocator(
+        new ResourceLocator() {
+          @Override
+          public String getString(
+              String fullName,
+              java.nio.charset.Charset encoding,
+              com.hubspot.jinjava.interpret.JinjavaInterpreter interpreter)
+              throws IOException {
+            try (InputStream is = getClass().getResourceAsStream("/templates/" + fullName)) {
+              if (is == null) throw new IOException("Template not found: " + fullName);
+              return new String(is.readAllBytes(), encoding);
+            }
+          }
+        });
     this.batchSize = batchSize;
   }
 
@@ -63,32 +68,33 @@ public abstract class BaseSynthesizer {
     Map<String, Object> props = response.getProperties();
 
     if (!props.containsKey("tests")) {
-        return tests;
+      return tests;
     }
 
     @SuppressWarnings("unchecked")
     List<Map<String, Object>> flatTests = (List<Map<String, Object>>) props.get("tests");
 
     for (Map<String, Object> flat : flatTests) {
-        Prompt promptObj = new Prompt(
-            null,
-            (String) flat.get("prompt_content"),
-            "user", // defaulting to user for single turn
-            Map.of("expected_response", flat.get("prompt_expected_response"),
-                   "language_code", flat.get("prompt_language_code"))
-        );
+      Prompt promptObj =
+          new Prompt(
+              null,
+              (String) flat.get("prompt_content"),
+              "user", // defaulting to user for single turn
+              Map.of(
+                  "expected_response", flat.get("prompt_expected_response"),
+                  "language_code", flat.get("prompt_language_code")));
 
-        tests.add(new Test(
-            null,
-            null,
-            (String) flat.get("behavior"),
-            (String) flat.get("category"),
-            (String) flat.get("topic"),
-            TestType.SINGLE_TURN,
-            promptObj,
-            null,
-            null
-        ));
+      tests.add(
+          new Test(
+              null,
+              null,
+              (String) flat.get("behavior"),
+              (String) flat.get("category"),
+              (String) flat.get("topic"),
+              TestType.SINGLE_TURN,
+              promptObj,
+              null,
+              null));
     }
     return tests;
   }

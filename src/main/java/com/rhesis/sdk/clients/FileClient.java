@@ -3,7 +3,6 @@ package com.rhesis.sdk.clients;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.rhesis.sdk.entities.File;
 import com.rhesis.sdk.http.InternalHttpClient;
-
 import java.util.List;
 
 public class FileClient {

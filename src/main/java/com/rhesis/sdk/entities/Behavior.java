@@ -9,11 +9,12 @@ public record Behavior(
     @JsonProperty("id") String id,
     @NotBlank @JsonProperty("name") String name,
     @JsonProperty("description") String description,
-    @JsonProperty("metadata") Map<String, Object> metadata) implements BaseEntity<Behavior> {
+    @JsonProperty("metadata") Map<String, Object> metadata)
+    implements BaseEntity<Behavior> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/behaviors";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/behaviors";
+  }
 }

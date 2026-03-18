@@ -15,11 +15,12 @@ public record Test(
     @JsonProperty("test_type") TestType testType,
     @JsonProperty("prompt") Prompt prompt,
     @JsonProperty("metadata") Map<String, Object> metadata,
-    @JsonProperty("files") List<String> files) implements BaseEntity<Test> {
+    @JsonProperty("files") List<String> files)
+    implements BaseEntity<Test> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/tests";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/tests";
+  }
 }

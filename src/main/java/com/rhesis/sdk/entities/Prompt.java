@@ -9,11 +9,12 @@ public record Prompt(
     @JsonProperty("id") String id,
     @NotBlank @JsonProperty("content") String content,
     @JsonProperty("role") String role,
-    @JsonProperty("metadata") Map<String, Object> metadata) implements BaseEntity<Prompt> {
+    @JsonProperty("metadata") Map<String, Object> metadata)
+    implements BaseEntity<Prompt> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/prompts";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/prompts";
+  }
 }

@@ -1,8 +1,8 @@
 package com.rhesis.sdk.unit;
 
-import com.rhesis.sdk.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.rhesis.sdk.*;
 import org.junit.jupiter.api.Test;
 
 class RhesisClientBuilderTest {

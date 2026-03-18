@@ -13,11 +13,12 @@ public record TestRun(
     @JsonProperty("status") Object status, // Can be String enum or Status object
     @JsonProperty("attributes") Map<String, Object> attributes,
     @JsonProperty("owner_id") String ownerId,
-    @JsonProperty("assignee_id") String assigneeId) implements BaseEntity<TestRun> {
+    @JsonProperty("assignee_id") String assigneeId)
+    implements BaseEntity<TestRun> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/test_runs";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/test_runs";
+  }
 }

@@ -9,11 +9,12 @@ public record Category(
     @JsonProperty("id") String id,
     @NotBlank @JsonProperty("name") String name,
     @JsonProperty("description") String description,
-    @JsonProperty("metadata") Map<String, Object> metadata) implements BaseEntity<Category> {
+    @JsonProperty("metadata") Map<String, Object> metadata)
+    implements BaseEntity<Category> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/categories";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/categories";
+  }
 }

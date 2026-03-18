@@ -1,12 +1,12 @@
 package com.rhesis.sdk.unit.http;
 
-import com.rhesis.sdk.http.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.rhesis.sdk.exceptions.RhesisApiException;
+import com.rhesis.sdk.http.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

@@ -1,12 +1,12 @@
 package com.rhesis.sdk;
 
 import com.rhesis.sdk.clients.EndpointClient;
+import com.rhesis.sdk.clients.FileClient;
 import com.rhesis.sdk.clients.ProjectClient;
 import com.rhesis.sdk.clients.TestClient;
 import com.rhesis.sdk.clients.TestResultClient;
 import com.rhesis.sdk.clients.TestRunClient;
 import com.rhesis.sdk.clients.TestSetClient;
-import com.rhesis.sdk.clients.FileClient;
 import com.rhesis.sdk.http.InternalHttpClient;
 import com.rhesis.sdk.models.RhesisNativeModelClient;
 import com.rhesis.sdk.synthesizers.SynthesizerClient;

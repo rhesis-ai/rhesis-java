@@ -37,20 +37,20 @@ public class Synthesizer extends BaseSynthesizer {
     int currentBatchSize = batchSize;
 
     if (numBatches == 0) {
-        numBatches = 1;
-        currentBatchSize = numTests;
+      numBatches = 1;
+      currentBatchSize = numTests;
     }
 
     for (int i = 0; i < numBatches; i++) {
-        Map<String, Object> context = new HashMap<>();
-        context.put("generation_prompt", config.getGenerationPrompt());
-        context.put("behaviors", config.getBehaviors());
-        context.put("categories", config.getCategories());
-        context.put("topics", config.getTopics());
-        context.put("num_tests", currentBatchSize);
+      Map<String, Object> context = new HashMap<>();
+      context.put("generation_prompt", config.getGenerationPrompt());
+      context.put("behaviors", config.getBehaviors());
+      context.put("categories", config.getCategories());
+      context.put("topics", config.getTopics());
+      context.put("num_tests", currentBatchSize);
 
-        String renderedPrompt = renderTemplate("synthesizer.jinja", context);
-        generatedTests.addAll(generateSingleTurnBatch(renderedPrompt));
+      String renderedPrompt = renderTemplate("synthesizer.jinja", context);
+      generatedTests.addAll(generateSingleTurnBatch(renderedPrompt));
     }
 
     return new TestSet(

@@ -9,11 +9,12 @@ public record Topic(
     @JsonProperty("id") String id,
     @NotBlank @JsonProperty("name") String name,
     @JsonProperty("description") String description,
-    @JsonProperty("metadata") Map<String, Object> metadata) implements BaseEntity<Topic> {
+    @JsonProperty("metadata") Map<String, Object> metadata)
+    implements BaseEntity<Topic> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/topics";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/topics";
+  }
 }

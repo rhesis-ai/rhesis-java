@@ -1,8 +1,8 @@
 package com.rhesis.sdk.synthesizers;
 
-import com.rhesis.sdk.entities.TestSet;
 import com.rhesis.sdk.entities.Test;
 import com.rhesis.sdk.entities.TestConfiguration;
+import com.rhesis.sdk.entities.TestSet;
 import com.rhesis.sdk.enums.TestType;
 import com.rhesis.sdk.models.ChatModelClient;
 import com.rhesis.sdk.models.ChatRequest;
@@ -35,12 +35,12 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
     int currentBatchSize = batchSize;
 
     if (numBatches == 0) {
-        numBatches = 1;
-        currentBatchSize = numTests;
+      numBatches = 1;
+      currentBatchSize = numTests;
     }
 
     for (int i = 0; i < numBatches; i++) {
-        generatedTests.addAll(generateBatch(currentBatchSize));
+      generatedTests.addAll(generateBatch(currentBatchSize));
     }
 
     return new TestSet(
@@ -72,26 +72,27 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
 
   @SuppressWarnings("unchecked")
   private List<Test> parseResponse(ChatResponse response) {
-      List<Test> tests = new ArrayList<>();
-      Map<String, Object> props = response.getProperties();
+    List<Test> tests = new ArrayList<>();
+    Map<String, Object> props = response.getProperties();
 
-      if (!props.containsKey("tests")) {
-          return tests;
-      }
+    if (!props.containsKey("tests")) {
+      return tests;
+    }
 
-      List<Map<String, Object>> flatTests = (List<Map<String, Object>>) props.get("tests");
+    List<Map<String, Object>> flatTests = (List<Map<String, Object>>) props.get("tests");
 
-      for (Map<String, Object> flat : flatTests) {
-          TestConfiguration testConfig = new TestConfiguration(
+    for (Map<String, Object> flat : flatTests) {
+      TestConfiguration testConfig =
+          new TestConfiguration(
               (String) flat.get("test_configuration_goal"),
               (String) flat.get("test_configuration_instructions"),
               (String) flat.get("test_configuration_restrictions"),
               (String) flat.get("test_configuration_scenario"),
               ((Number) flat.get("test_configuration_min_turns")).intValue(),
-              ((Number) flat.get("test_configuration_max_turns")).intValue()
-          );
+              ((Number) flat.get("test_configuration_max_turns")).intValue());
 
-          tests.add(new Test(
+      tests.add(
+          new Test(
               null,
               testConfig,
               (String) flat.get("behavior"),
@@ -100,11 +101,10 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
               TestType.MULTI_TURN,
               null,
               null,
-              null
-          ));
-      }
+              null));
+    }
 
-      return tests;
+    return tests;
   }
 
   public String getRenderedPrompt() {

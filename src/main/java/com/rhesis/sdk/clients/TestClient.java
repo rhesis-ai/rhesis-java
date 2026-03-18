@@ -1,9 +1,9 @@
 package com.rhesis.sdk.clients;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.rhesis.sdk.entities.Test;
 import com.rhesis.sdk.http.InternalHttpClient;
 import java.util.List;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 public class TestClient {
   private final InternalHttpClient httpClient;

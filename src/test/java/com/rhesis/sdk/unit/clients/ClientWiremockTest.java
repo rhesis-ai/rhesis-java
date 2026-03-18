@@ -1,22 +1,22 @@
 package com.rhesis.sdk.unit.clients;
 
-import com.rhesis.sdk.clients.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.rhesis.sdk.RhesisClient;
-import com.rhesis.sdk.entities.TestRun;
-import com.rhesis.sdk.entities.TestResult;
+import com.rhesis.sdk.clients.*;
 import com.rhesis.sdk.entities.File;
+import com.rhesis.sdk.entities.TestResult;
+import com.rhesis.sdk.entities.TestRun;
 import com.rhesis.sdk.entities.TestSet;
 import com.rhesis.sdk.enums.RunStatus;
 import com.rhesis.sdk.enums.TestType;
+import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import java.util.List;
 
 class ClientWiremockTest {
   private static WireMockServer wireMockServer;
@@ -91,8 +91,7 @@ class ClientWiremockTest {
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
-                    .withBody(
-                        "{\"id\":\"tr-1\",\"status\":\"Completed\",\"name\":\"Run 1\"}")));
+                    .withBody("{\"id\":\"tr-1\",\"status\":\"Completed\",\"name\":\"Run 1\"}")));
 
     TestRun response = testRunClient.get("tr-1");
     assertThat(response.id()).isEqualTo("tr-1");
@@ -108,8 +107,7 @@ class ClientWiremockTest {
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
-                    .withBody(
-                        "[{\"id\":\"res-1\",\"test_run_id\":\"tr-1\"}]")));
+                    .withBody("[{\"id\":\"res-1\",\"test_run_id\":\"tr-1\"}]")));
 
     List<TestResult> response = testRunClient.getTestResults("tr-1");
     assertThat(response).hasSize(1);
@@ -125,8 +123,7 @@ class ClientWiremockTest {
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
-                    .withBody(
-                        "{\"id\":\"file-123\",\"filename\":\"data.json\"}")));
+                    .withBody("{\"id\":\"file-123\",\"filename\":\"data.json\"}")));
 
     File response = fileClient.get("file-123");
     assertThat(response.id()).isEqualTo("file-123");

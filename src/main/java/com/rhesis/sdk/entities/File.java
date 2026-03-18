@@ -11,11 +11,12 @@ public record File(
     @JsonProperty("description") String description,
     @JsonProperty("entity_id") String entityId,
     @JsonProperty("entity_type") String entityType,
-    @JsonProperty("position") Integer position) implements BaseEntity<File> {
+    @JsonProperty("position") Integer position)
+    implements BaseEntity<File> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/files";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/files";
+  }
 }

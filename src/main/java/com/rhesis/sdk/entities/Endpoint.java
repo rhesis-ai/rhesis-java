@@ -18,11 +18,12 @@ public record Endpoint(
     @JsonProperty("query_params") Map<String, Object> queryParams,
     @JsonProperty("request_mapping") Map<String, Object> requestMapping,
     @JsonProperty("response_mapping") Map<String, String> responseMapping,
-    @JsonProperty("auth_token") String authToken) implements BaseEntity<Endpoint> {
+    @JsonProperty("auth_token") String authToken)
+    implements BaseEntity<Endpoint> {
 
-    @JsonIgnore
-    @Override
-    public String getEndpointPath() {
-        return "/endpoints";
-    }
+  @JsonIgnore
+  @Override
+  public String getEndpointPath() {
+    return "/endpoints";
+  }
 }

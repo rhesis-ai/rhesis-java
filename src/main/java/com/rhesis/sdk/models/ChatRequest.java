@@ -8,5 +8,4 @@ public record ChatRequest(
     @NotBlank @JsonProperty("prompt") String prompt,
     @JsonProperty("temperature") Double temperature,
     @JsonProperty("max_tokens") Integer maxTokens,
-    @JsonProperty("schema") Map<String, Object> schema) {
-}
+    @JsonProperty("schema") Map<String, Object> schema) {}

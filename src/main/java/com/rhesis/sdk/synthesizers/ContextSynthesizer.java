@@ -27,7 +27,10 @@ public class ContextSynthesizer extends BaseSynthesizer {
 
   // Backwards compatibility constructor
   public ContextSynthesizer(String prompt, String contextData, int batchSize) {
-    this(GenerationConfig.builder().generationPrompt(prompt).additionalContext(contextData).build(), null, batchSize);
+    this(
+        GenerationConfig.builder().generationPrompt(prompt).additionalContext(contextData).build(),
+        null,
+        batchSize);
   }
 
   public ContextSynthesizer(String prompt, String contextData) {
@@ -37,7 +40,7 @@ public class ContextSynthesizer extends BaseSynthesizer {
   @Override
   public TestSet generate(int numTests) {
     if (config.getAdditionalContext() == null || config.getAdditionalContext().isEmpty()) {
-        throw new IllegalArgumentException("Context cannot be empty");
+      throw new IllegalArgumentException("Context cannot be empty");
     }
 
     List<Test> generatedTests = new ArrayList<>();
@@ -45,22 +48,22 @@ public class ContextSynthesizer extends BaseSynthesizer {
     int currentBatchSize = batchSize;
 
     if (numBatches == 0) {
-        numBatches = 1;
-        currentBatchSize = numTests;
+      numBatches = 1;
+      currentBatchSize = numTests;
     }
 
     for (int i = 0; i < numBatches; i++) {
-        Map<String, Object> context = new HashMap<>();
-        context.put("generation_prompt", config.getGenerationPrompt());
-        // Map additionalContext to context to match the jinja template
-        context.put("context", config.getAdditionalContext());
-        context.put("behaviors", config.getBehaviors());
-        context.put("categories", config.getCategories());
-        context.put("topics", config.getTopics());
-        context.put("num_tests", currentBatchSize);
+      Map<String, Object> context = new HashMap<>();
+      context.put("generation_prompt", config.getGenerationPrompt());
+      // Map additionalContext to context to match the jinja template
+      context.put("context", config.getAdditionalContext());
+      context.put("behaviors", config.getBehaviors());
+      context.put("categories", config.getCategories());
+      context.put("topics", config.getTopics());
+      context.put("num_tests", currentBatchSize);
 
-        String renderedPrompt = renderTemplate("context_synthesizer.jinja", context);
-        generatedTests.addAll(generateSingleTurnBatch(renderedPrompt));
+      String renderedPrompt = renderTemplate("context_synthesizer.jinja", context);
+      generatedTests.addAll(generateSingleTurnBatch(renderedPrompt));
     }
 
     return new TestSet(

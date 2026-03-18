@@ -4,9 +4,9 @@
 format:
 	mvn spotless:apply
 
-# Check code formatting
+# Check code formatting and static analysis
 lint:
-	mvn spotless:check
+	mvn spotless:check pmd:check
 
 check: lint
 

@@ -71,7 +71,6 @@ public class InternalHttpClient {
     }
   }
 
-
   public <T, R> R put(String path, T requestBody, Class<R> responseType) {
     validate(requestBody);
     try {
@@ -100,7 +99,8 @@ public class InternalHttpClient {
     return executeRequest(request, responseType);
   }
 
-  public <T, R> R post(String path, T requestBody, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
+  public <T, R> R post(
+      String path, T requestBody, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
     validate(requestBody);
     try {
       String jsonBody = objectMapper.writeValueAsString(requestBody);
@@ -138,6 +138,7 @@ public class InternalHttpClient {
       throw new RuntimeException("Failed to execute request", e);
     }
   }
+
   public <R> R get(String path, Class<R> responseType) {
     HttpRequest request =
         HttpRequest.newBuilder()
@@ -149,8 +150,8 @@ public class InternalHttpClient {
     return executeRequest(request, responseType);
   }
 
-
-  private <R> R executeRequest(HttpRequest request, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
+  private <R> R executeRequest(
+      HttpRequest request, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
     try {
       HttpResponse<String> response =
           httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -170,13 +171,15 @@ public class InternalHttpClient {
       throw new RuntimeException("Failed to execute request", e);
     }
   }
+
   private <R> R executeRequest(HttpRequest request, Class<R> responseType) {
     try {
       if (responseType == byte[].class) {
         HttpResponse<byte[]> response =
             httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
         if (response.statusCode() >= 400) {
-          throw new RhesisApiException("API request failed", response.statusCode(), new String(response.body()));
+          throw new RhesisApiException(
+              "API request failed", response.statusCode(), new String(response.body()));
         }
         return responseType.cast(response.body());
       }
