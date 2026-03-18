@@ -68,58 +68,49 @@ The Rhesis Java SDK provides programmatic access to the Rhesis testing platform:
 
 ## 🚀 Installation
 
-The Rhesis Java SDK is published to GitHub Packages. You'll need to configure your build tool to authenticate with GitHub Packages using a Personal Access Token (PAT) with `read:packages` permission.
+The Rhesis Java SDK is published via [JitPack](https://jitpack.io/#rhesis-ai/rhesis-java), making it incredibly easy to include in your projects without needing any complex authentication or tokens.
 
 ### Maven
 
-1. Add the server authentication to your `~/.m2/settings.xml`:
-```xml
-<settings>
-  <servers>
-    <server>
-      <id>github</id>
-      <username>YOUR_GITHUB_USERNAME</username>
-      <password>YOUR_GITHUB_PAT</password>
-    </server>
-  </servers>
-</settings>
-```
-
-2. Add the repository and dependency to your `pom.xml`:
+1. Add the JitPack repository to your `pom.xml`:
 ```xml
 <repositories>
     <repository>
-        <id>github</id>
-        <url>https://maven.pkg.github.com/rhesis-ai/rhesis-java</url>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
     </repository>
 </repositories>
+```
 
+2. Add the dependency to your `pom.xml`:
+```xml
 <dependencies>
     <dependency>
-        <groupId>com.rhesis</groupId>
+        <groupId>com.github.rhesis-ai</groupId>
         <artifactId>rhesis-java</artifactId>
-        <version>0.1.0</version>
+        <version>main-SNAPSHOT</version> <!-- Or use a specific release tag like 0.1.0 -->
     </dependency>
 </dependencies>
 ```
 
 ### Gradle
 
-Add the repository and dependency to your `build.gradle`:
+1. Add the JitPack repository to your `build.gradle` at the end of repositories:
 ```groovy
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("https://maven.pkg.github.com/rhesis-ai/rhesis-java")
-        credentials {
-            username = System.getenv("GITHUB_ACTOR") ?: "YOUR_GITHUB_USERNAME"
-            password = System.getenv("GITHUB_TOKEN") ?: "YOUR_GITHUB_PAT"
-        }
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
+```
+*(If you are on an older Gradle version, add it under `allprojects { repositories { ... } }`)*
 
+2. Add the dependency:
+```groovy
 dependencies {
-    implementation 'com.rhesis:rhesis-java:0.1.0'
+    implementation 'com.github.rhesis-ai:rhesis-java:main-SNAPSHOT' // Or use a specific release tag like 0.1.0
 }
 ```
 
