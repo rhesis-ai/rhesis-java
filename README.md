@@ -67,20 +67,59 @@ The Rhesis Java SDK provides programmatic access to the Rhesis testing platform:
 
 ## 🚀 Installation
 
-Add the Rhesis SDK to your project using Maven:
+The Rhesis Java SDK is published to GitHub Packages. You'll need to configure your build tool to authenticate with GitHub Packages using a Personal Access Token (PAT) with `read:packages` permission.
 
+### Maven
+
+1. Add the server authentication to your `~/.m2/settings.xml`:
 ```xml
-<dependency>
-    <groupId>com.rhesis</groupId>
-    <artifactId>rhesis-java</artifactId>
-    <version>0.1.0</version>
-</dependency>
+<settings>
+  <servers>
+    <server>
+      <id>github</id>
+      <username>YOUR_GITHUB_USERNAME</username>
+      <password>YOUR_GITHUB_PAT</password>
+    </server>
+  </servers>
+</settings>
 ```
 
-Or using Gradle:
+2. Add the repository and dependency to your `pom.xml`:
+```xml
+<repositories>
+    <repository>
+        <id>github</id>
+        <url>https://maven.pkg.github.com/rhesis-ai/rhesis-java</url>
+    </repository>
+</repositories>
 
+<dependencies>
+    <dependency>
+        <groupId>com.rhesis</groupId>
+        <artifactId>rhesis-java</artifactId>
+        <version>0.1.0</version>
+    </dependency>
+</dependencies>
+```
+
+### Gradle
+
+Add the repository and dependency to your `build.gradle`:
 ```groovy
-implementation 'com.rhesis:rhesis-java:0.1.0'
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/rhesis-ai/rhesis-java")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR") ?: "YOUR_GITHUB_USERNAME"
+            password = System.getenv("GITHUB_TOKEN") ?: "YOUR_GITHUB_PAT"
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.rhesis:rhesis-java:0.1.0'
+}
 ```
 
 ## ☕ Requirements

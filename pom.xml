@@ -127,12 +127,46 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
-            
+
             <!-- Maven Surefire Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
+            </plugin>
+
+            <!-- Maven Source Plugin (Required for publishing) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Maven Javadoc Plugin (Required for publishing) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- Disable strict javadoc checking -->
+                    <doclint>none</doclint>
+                </configuration>
             </plugin>
 
             <!-- Spotless Plugin -->
@@ -151,4 +185,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- Configure GitHub Packages for distribution -->
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/rhesis-ai/rhesis-java</url>
+        </repository>
+    </distributionManagement>
 </project>
