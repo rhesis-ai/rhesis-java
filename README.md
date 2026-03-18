@@ -73,14 +73,14 @@ Add the Rhesis SDK to your project using Maven:
 <dependency>
     <groupId>com.rhesis</groupId>
     <artifactId>rhesis-java</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
 Or using Gradle:
 
 ```groovy
-implementation 'com.rhesis:rhesis-java:1.0.0-SNAPSHOT'
+implementation 'com.rhesis:rhesis-java:0.1.0'
 ```
 
 ## ☕ Requirements
