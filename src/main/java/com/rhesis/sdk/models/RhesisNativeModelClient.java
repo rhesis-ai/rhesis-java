@@ -1,7 +1,7 @@
 package com.rhesis.sdk.models;
 
-import com.rhesis.sdk.entities.models.ChatRequest;
-import com.rhesis.sdk.entities.models.ChatResponse;
+import com.rhesis.sdk.models.ChatRequest;
+import com.rhesis.sdk.models.ChatResponse;
 import com.rhesis.sdk.http.InternalHttpClient;
 
 public class RhesisNativeModelClient {

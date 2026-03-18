@@ -1,4 +1,4 @@
-package com.rhesis.sdk.entities.models;
+package com.rhesis.sdk.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

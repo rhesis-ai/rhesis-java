@@ -1,0 +1,5 @@
+Generate a test set for the following configurations:
+Prompt: {{ prompt }}
+{% if behaviors %}Behaviors: {{ behaviors | join(', ') }}{% endif %}
+{% if categories %}Categories: {{ categories | join(', ') }}{% endif %}
+{% if topics %}Topics: {{ topics | join(', ') }}{% endif %}

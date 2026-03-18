@@ -1,4 +1,4 @@
-package com.rhesis.sdk.synthesizers;
+package com.rhesis.sdk.clients;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -6,16 +6,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.rhesis.sdk.RhesisClient;
-import com.rhesis.sdk.synthesizers.SynthesizerConfig;
-import com.rhesis.sdk.synthesizers.SynthesizerResponse;
+import com.rhesis.sdk.entities.TestSet;
+import com.rhesis.sdk.enums.TestType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-class SynthesizerClientTest {
-
+class ClientWiremockTest {
   private static WireMockServer wireMockServer;
-  private static SynthesizerClient client;
+  private static TestClient testClient;
+  private static TestSetClient testSetClient;
 
   @BeforeAll
   static void setUp() {
@@ -25,7 +25,8 @@ class SynthesizerClientTest {
 
     RhesisClient rhesisClient =
         RhesisClient.builder().baseUrl("http://localhost:8089/v1").apiKey("test-key").build();
-    client = rhesisClient.synthesizers();
+    testClient = rhesisClient.tests();
+    testSetClient = rhesisClient.testSets();
   }
 
   @AfterAll
@@ -34,40 +35,38 @@ class SynthesizerClientTest {
   }
 
   @Test
-  void testCreateSynthesizer() {
+  void testGetTest() {
     stubFor(
-        post(urlEqualTo("/v1/synthesizers"))
+        get(urlEqualTo("/v1/tests/t-123"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"id\":\"synth-123\",\"name\":\"Test Synth\",\"description\":\"Desc\",\"base_model\":\"model-xyz\",\"status\":\"READY\"}")));
+                        "{\"id\":\"t-123\",\"test_type\":\"SINGLE_TURN\",\"behavior\":\"b1\"}")));
 
-    SynthesizerConfig config = new SynthesizerConfig("Test Synth", "Desc", "model-xyz");
-    SynthesizerResponse response = client.create(config);
-
-    assertThat(response.id()).isEqualTo("synth-123");
-    assertThat(response.name()).isEqualTo("Test Synth");
-    assertThat(response.baseModel()).isEqualTo("model-xyz");
+    com.rhesis.sdk.entities.Test response = testClient.get("t-123");
+    assertThat(response.id()).isEqualTo("t-123");
+    assertThat(response.testType()).isEqualTo(TestType.SINGLE_TURN);
+    assertThat(response.behavior()).isEqualTo("b1");
   }
 
   @Test
-  void testGetSynthesizer() {
+  void testGetTestSet() {
     stubFor(
-        get(urlEqualTo("/v1/synthesizers/synth-123"))
+        get(urlEqualTo("/v1/test-sets/ts-123"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"id\":\"synth-123\",\"name\":\"Test Synth\",\"description\":\"Desc\",\"base_model\":\"model-xyz\",\"status\":\"READY\"}")));
+                        "{\"id\":\"ts-123\",\"name\":\"My TestSet\",\"test_set_type\":\"MULTI_TURN\"}")));
 
-    SynthesizerResponse response = client.get("synth-123");
-
-    assertThat(response.id()).isEqualTo("synth-123");
-    assertThat(response.name()).isEqualTo("Test Synth");
+    TestSet response = testSetClient.get("ts-123");
+    assertThat(response.id()).isEqualTo("ts-123");
+    assertThat(response.name()).isEqualTo("My TestSet");
+    assertThat(response.testSetType()).isEqualTo(TestType.MULTI_TURN);
   }
 }

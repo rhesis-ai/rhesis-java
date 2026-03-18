@@ -2,8 +2,8 @@ package com.rhesis.sdk.entities;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.rhesis.sdk.entities.models.ChatRequest;
-import com.rhesis.sdk.entities.synthesizers.SynthesizerConfig;
+import com.rhesis.sdk.models.ChatRequest;
+import com.rhesis.sdk.synthesizers.SynthesizerConfig;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

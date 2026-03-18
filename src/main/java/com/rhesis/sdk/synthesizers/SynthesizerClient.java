@@ -1,7 +1,7 @@
 package com.rhesis.sdk.synthesizers;
 
-import com.rhesis.sdk.entities.synthesizers.SynthesizerConfig;
-import com.rhesis.sdk.entities.synthesizers.SynthesizerResponse;
+import com.rhesis.sdk.synthesizers.SynthesizerConfig;
+import com.rhesis.sdk.synthesizers.SynthesizerResponse;
 import com.rhesis.sdk.http.InternalHttpClient;
 
 public class SynthesizerClient {

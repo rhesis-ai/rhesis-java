@@ -1,4 +1,4 @@
-package com.rhesis.sdk.entities.synthesizers;
+package com.rhesis.sdk.synthesizers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
