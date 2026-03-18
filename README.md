@@ -49,6 +49,7 @@ The Rhesis Java SDK empowers developers to programmatically access curated test 
   - [Configure and Use the SDK](#2-configure-and-use-the-sdk-%EF%B8%8F)
 - [Quick Start](#-quick-start)
   - [Generating Custom Test Sets](#generating-custom-test-sets-%EF%B8%8F)
+  - [Examples](#examples-)
 - [About Rhesis AI](#-about-rhesis-ai)
 - [Community](#-community-)
 - [Hugging Face](#-hugging-face)
@@ -124,20 +125,31 @@ dependencies {
 
 ## ☕ Requirements
 
-Rhesis Java SDK requires **Java 21** or newer.
+Rhesis Java SDK requires **Java 21** or newer and **Maven**.
 
 If you don't have Java 21 installed, we recommend installing it via:
 
 **macOS (Homebrew):**
 ```bash
-brew install openjdk@21
+brew install maven openjdk@21
 # Don't forget to symlink or export JAVA_HOME as recommended by brew!
 ```
 
 **Linux / Windows (SDKMAN!):**
 ```bash
 sdk install java 21-tem
+sdk install maven
 ```
+
+### Development using Make
+For contributors, the project includes a `Makefile` with helpful shortcuts:
+- `make format`: Auto-format code with Spotless
+- `make lint`: Check code formatting
+- `make test`: Run all tests (unit and integration)
+- `make test-unit`: Run only unit tests
+- `make test-integration`: Run only integration tests
+- `make build`: Clean and install the project
+- `make clean`: Clean the target directory
 
 ## 🏁 Getting Started
 
@@ -185,9 +197,23 @@ public class Main {
 }
 ```
 
+## ⚡ Quick Start
+
 ### Generating Custom Test Sets 🛠️
 
 If none of the existing test sets fit your needs, you can generate your own. You can check out [app.rhesis.ai](http://app.rhesis.ai). There you can define requirements, scenarios and behaviors.
+
+### Examples 💡
+
+Looking for more detailed examples? Check out our runnable examples in the [`src/test/java/com/rhesis/sdk/examples/`](src/test/java/com/rhesis/sdk/examples/) directory. These include:
+- [Creating an Endpoint](src/test/java/com/rhesis/sdk/examples/CreateEndpointExample.java)
+
+You can run these examples directly from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment or in a `.env` file at the root of the project:
+
+```bash
+mvn clean test-compile
+mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="com.rhesis.sdk.examples.CreateEndpointExample"
+```
 
 ## 🧪 About Rhesis AI
 
