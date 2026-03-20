@@ -18,3 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `CreateEndpointExample` and `FileSupportExample` to use the new Builder syntax.
 - Updated unit tests (`EntityTest`, `ClientWiremockTest`) and integration tests to use the new entity builders.
 - Fixed a Jackson deserialization issue using `NameStringDeserializer` to handle polymorphic JSON fields from the backend API.
+
+## [0.1.0] - 2026-03-18
+
+### Added
+- Initial release of the Rhesis Java SDK.
+- Core entities and API clients (`Test`, `TestSet`, `Endpoint`, `Project`, `TestRun`, `TestResult`, `Prompt`, `Status`).
+- Local synthesizers for test generation using Jinja templates.
+- Comprehensive unit testing suite using WireMock, JUnit 5, and AssertJ.
+- Integration tests setup using Maven Failsafe plugin.
+- Support for loading environment variables via `dotenv-java`.
+- CI/CD workflows for linting (Spotless, PMD, ErrorProne) and testing on pull requests.
+- Makefile for common build tasks.
+- GitHub Packages publishing setup.
