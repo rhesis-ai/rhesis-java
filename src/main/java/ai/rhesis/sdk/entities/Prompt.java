@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Map;
+import lombok.Builder;
 
+@Builder
 public record Prompt(
     @JsonProperty("id") String id,
     @NotBlank @JsonProperty("content") String content,

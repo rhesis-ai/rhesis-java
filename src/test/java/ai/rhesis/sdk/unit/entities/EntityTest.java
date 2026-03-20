@@ -25,18 +25,26 @@ class EntityTest {
 
   @Test
   void testTestSerialization() throws Exception {
-    TestConfiguration config = new TestConfiguration("Goal", "", "", "", null, null);
+    TestConfiguration config =
+        TestConfiguration.builder()
+            .goal("Goal")
+            .instructions("")
+            .restrictions("")
+            .scenario("")
+            .build();
     ai.rhesis.sdk.entities.Test test =
-        new ai.rhesis.sdk.entities.Test(
-            "test-1",
-            config,
-            "Behavior1",
-            "Category1",
-            "Topic1",
-            TestType.SINGLE_TURN,
-            new Prompt("p1", "hello", "user", Map.of()),
-            Map.of("key", "value"),
-            List.of());
+        ai.rhesis.sdk.entities.Test.builder()
+            .id("test-1")
+            .testConfiguration(config)
+            .behavior("Behavior1")
+            .category("Category1")
+            .topic("Topic1")
+            .testType(TestType.SINGLE_TURN)
+            .prompt(
+                Prompt.builder().id("p1").content("hello").role("user").metadata(Map.of()).build())
+            .metadata(Map.of("key", "value"))
+            .files(List.of())
+            .build();
 
     String json = mapper.writeValueAsString(test);
     assertThat(json).contains("\"test_type\":\"Single-Turn\"");
@@ -77,7 +85,13 @@ class EntityTest {
 
   @Test
   void testPromptSerialization() throws Exception {
-    Prompt prompt = new Prompt("prompt-1", "Hello there", "user", Map.of("foo", "bar"));
+    Prompt prompt =
+        Prompt.builder()
+            .id("prompt-1")
+            .content("Hello there")
+            .role("user")
+            .metadata(Map.of("foo", "bar"))
+            .build();
     String json = mapper.writeValueAsString(prompt);
     Prompt parsed = mapper.readValue(json, Prompt.class);
     assertThat(parsed.id()).isEqualTo("prompt-1");
@@ -88,7 +102,14 @@ class EntityTest {
 
   @Test
   void testTestSetSerialization() throws Exception {
-    TestSet testSet = new TestSet("ts-1", "TestSet 1", "Desc", TestType.MULTI_TURN, List.of());
+    TestSet testSet =
+        TestSet.builder()
+            .id("ts-1")
+            .name("TestSet 1")
+            .description("Desc")
+            .testSetType(TestType.MULTI_TURN)
+            .tests(List.of())
+            .build();
     String json = mapper.writeValueAsString(testSet);
     TestSet parsed = mapper.readValue(json, TestSet.class);
     assertThat(parsed.id()).isEqualTo("ts-1");
@@ -142,19 +163,21 @@ class EntityTest {
 
   @Test
   void testTestResultSerialization() throws Exception {
-    Status status = new Status("status-1", "Passed", "Test passed");
+    Status status =
+        Status.builder().id("status-1").name("Passed").description("Test passed").build();
     TestResult result =
-        new TestResult(
-            "res-1",
-            "config-1",
-            "run-1",
-            "prompt-1",
-            "test-1",
-            "status-1",
-            status,
-            Map.of("out", "val"),
-            Map.of("score", 1.0),
-            Map.of("rev", "good"));
+        TestResult.builder()
+            .id("res-1")
+            .testConfigurationId("config-1")
+            .testRunId("run-1")
+            .promptId("prompt-1")
+            .testId("test-1")
+            .statusId("status-1")
+            .status(status)
+            .testOutput(Map.of("out", "val"))
+            .testMetrics(Map.of("score", 1.0))
+            .testReviews(Map.of("rev", "good"))
+            .build();
     String json = mapper.writeValueAsString(result);
     TestResult parsed = mapper.readValue(json, TestResult.class);
     assertThat(parsed.id()).isEqualTo("res-1");

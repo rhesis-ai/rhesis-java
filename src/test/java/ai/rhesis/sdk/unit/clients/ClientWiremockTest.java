@@ -143,4 +143,140 @@ class ClientWiremockTest {
     assertThat(new String(response, java.nio.charset.StandardCharsets.UTF_8))
         .isEqualTo("hello world");
   }
+
+  @Test
+  void testUploadFile() {
+    stubFor(
+        post(urlEqualTo("/files/?entity_id=ent-123&entity_type=Test"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .withHeader("Content-Type", containing("multipart/form-data; boundary="))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("[{\"id\":\"file-1\",\"filename\":\"test.txt\"}]")));
+
+    List<ai.rhesis.sdk.models.FileUpload> files =
+        List.of(
+            new ai.rhesis.sdk.models.FileUpload(
+                "test.txt",
+                "text/plain",
+                "hello".getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+
+    List<File> response = fileClient.upload(files, "ent-123", "Test");
+    assertThat(response).hasSize(1);
+    assertThat(response.get(0).id()).isEqualTo("file-1");
+    assertThat(response.get(0).filename()).isEqualTo("test.txt");
+  }
+
+  @Test
+  void testTestAddFile() throws Exception {
+    java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test", ".txt");
+    java.nio.file.Files.writeString(tempFile, "hello");
+
+    try {
+      stubFor(
+          post(urlEqualTo("/files/?entity_id=t-123&entity_type=Test"))
+              .withHeader("Authorization", equalTo("Bearer test-key"))
+              .withHeader("Content-Type", containing("multipart/form-data; boundary="))
+              .willReturn(
+                  aResponse()
+                      .withStatus(200)
+                      .withHeader("Content-Type", "application/json")
+                      .withBody(
+                          "[{\"id\":\"file-1\",\"filename\":\""
+                              + tempFile.getFileName().toString()
+                              + "\"}]")));
+
+      List<File> response = testClient.addFile("t-123", tempFile);
+      assertThat(response).hasSize(1);
+      assertThat(response.get(0).id()).isEqualTo("file-1");
+    } finally {
+      java.nio.file.Files.delete(tempFile);
+    }
+  }
+
+  @Test
+  void testTestGetFiles() {
+    stubFor(
+        get(urlEqualTo("/tests/t-123/files"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("[{\"id\":\"file-1\",\"filename\":\"test.txt\"}]")));
+
+    List<File> response = testClient.getFiles("t-123");
+    assertThat(response).hasSize(1);
+    assertThat(response.get(0).id()).isEqualTo("file-1");
+  }
+
+  @Test
+  void testTestResultGetFiles() {
+    TestResultClient testResultClient =
+        RhesisClient.builder()
+            .baseUrl("http://localhost:8089")
+            .apiKey("test-key")
+            .build()
+            .testResults();
+
+    stubFor(
+        get(urlEqualTo("/test_results/tr-123/files"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("[{\"id\":\"file-1\",\"filename\":\"test.txt\"}]")));
+
+    List<File> response = testResultClient.getFiles("tr-123");
+    assertThat(response).hasSize(1);
+    assertThat(response.get(0).id()).isEqualTo("file-1");
+  }
+
+  @Test
+  void testCreateTestWithFiles() throws Exception {
+    java.nio.file.Path tempFile = java.nio.file.Files.createTempFile("test", ".txt");
+    java.nio.file.Files.writeString(tempFile, "hello");
+
+    try {
+      stubFor(
+          post(urlEqualTo("/tests/"))
+              .withHeader("Authorization", equalTo("Bearer test-key"))
+              .withHeader("Content-Type", equalTo("application/json"))
+              .willReturn(
+                  aResponse()
+                      .withStatus(200)
+                      .withHeader("Content-Type", "application/json")
+                      .withBody("{\"id\":\"t-new\"}")));
+
+      stubFor(
+          post(urlEqualTo("/files/?entity_id=t-new&entity_type=Test"))
+              .withHeader("Authorization", equalTo("Bearer test-key"))
+              .withHeader("Content-Type", containing("multipart/form-data; boundary="))
+              .willReturn(
+                  aResponse()
+                      .withStatus(200)
+                      .withHeader("Content-Type", "application/json")
+                      .withBody("[{\"id\":\"file-1\",\"filename\":\"test.txt\"}]")));
+
+      ai.rhesis.sdk.entities.Test testToCreate =
+          ai.rhesis.sdk.entities.Test.builder()
+              .behavior("Behavior")
+              .category("Category")
+              .topic("Topic")
+              .testType(TestType.SINGLE_TURN)
+              .files(List.of(tempFile.toString()))
+              .build();
+
+      ai.rhesis.sdk.entities.Test response = testClient.create(testToCreate);
+      assertThat(response.id()).isEqualTo("t-new");
+
+      verify(1, postRequestedFor(urlEqualTo("/tests/")));
+      verify(1, postRequestedFor(urlEqualTo("/files/?entity_id=t-new&entity_type=Test")));
+    } finally {
+      java.nio.file.Files.delete(tempFile);
+    }
+  }
 }

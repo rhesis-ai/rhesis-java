@@ -3,7 +3,9 @@ package ai.rhesis.sdk.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 
+@Builder
 public record TestConfiguration(
     @NotBlank @JsonProperty("goal") String goal,
     @JsonProperty("instructions") String instructions,

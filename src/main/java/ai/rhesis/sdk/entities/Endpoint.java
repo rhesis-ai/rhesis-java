@@ -4,7 +4,9 @@ import ai.rhesis.sdk.enums.ConnectionType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
+import lombok.Builder;
 
+@Builder
 public record Endpoint(
     @JsonProperty("id") String id,
     @JsonProperty("name") String name,

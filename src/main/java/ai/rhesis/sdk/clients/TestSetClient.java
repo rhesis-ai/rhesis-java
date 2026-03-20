@@ -24,6 +24,16 @@ public class TestSetClient {
     return httpClient.post("/test_sets/bulk", testSet, TestSet.class);
   }
 
+  public List<ai.rhesis.sdk.entities.Test> getTests(String id) {
+    return getTests(id, 0, 100);
+  }
+
+  public List<ai.rhesis.sdk.entities.Test> getTests(String id, int skip, int limit) {
+    return httpClient.get(
+        "/test_sets/" + id + "/tests?skip=" + skip + "&limit=" + limit,
+        new TypeReference<List<ai.rhesis.sdk.entities.Test>>() {});
+  }
+
   public void delete(String id) {
     httpClient.delete("/test_sets/" + id);
   }
