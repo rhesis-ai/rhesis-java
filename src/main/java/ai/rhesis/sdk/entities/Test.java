@@ -9,9 +9,18 @@ import java.util.Map;
 public record Test(
     @JsonProperty("id") String id,
     @JsonProperty("test_configuration") TestConfiguration testConfiguration,
-    @JsonProperty("behavior") String behavior,
-    @JsonProperty("category") String category,
-    @JsonProperty("topic") String topic,
+    @JsonProperty("behavior")
+        @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
+            using = NameStringDeserializer.class)
+        String behavior,
+    @JsonProperty("category")
+        @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
+            using = NameStringDeserializer.class)
+        String category,
+    @JsonProperty("topic")
+        @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
+            using = NameStringDeserializer.class)
+        String topic,
     @JsonProperty("test_type") TestType testType,
     @JsonProperty("prompt") Prompt prompt,
     @JsonProperty("metadata") Map<String, Object> metadata,

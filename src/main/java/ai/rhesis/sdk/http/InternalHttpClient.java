@@ -99,6 +99,22 @@ public class InternalHttpClient {
     return executeRequest(request, responseType);
   }
 
+  public <R> R postMultipart(
+      String path,
+      MultipartBuilder multipartBuilder,
+      com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
+    HttpRequest request =
+        HttpRequest.newBuilder()
+            .uri(URI.create(baseUrl + path))
+            .header(
+                "Content-Type", "multipart/form-data; boundary=" + multipartBuilder.getBoundary())
+            .header("Authorization", "Bearer " + apiKey)
+            .POST(multipartBuilder.build())
+            .build();
+
+    return executeRequest(request, responseType);
+  }
+
   public <T, R> R post(
       String path, T requestBody, com.fasterxml.jackson.core.type.TypeReference<R> responseType) {
     validate(requestBody);
