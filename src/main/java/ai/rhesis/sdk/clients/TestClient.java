@@ -75,12 +75,12 @@ public class TestClient {
     return new FileClient(httpClient).upload(files, testId, "Test");
   }
 
-  public List<File> addFile(String testId, java.nio.file.Path path) {
+  public List<File> addFile(String testId, Path path) {
     return addFiles(testId, List.of(FileUpload.fromPath(path)));
   }
 
-  public List<File> addFile(String testId, java.io.File file) {
-    return addFiles(testId, List.of(FileUpload.fromFile(file)));
+  public List<File> addFile(String testId, java.io.File fileUpload) {
+    return addFiles(testId, List.of(FileUpload.fromFile(fileUpload)));
   }
 
   public List<File> addFileFromBase64(

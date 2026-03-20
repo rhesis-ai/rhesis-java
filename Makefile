@@ -10,17 +10,17 @@ lint:
 
 check: lint
 
-# Run all tests (unit and integration)
+# Run all tests (unit and integration) (disables PMD checking since it's handled by lint)
 test:
-	mvn verify
+	mvn verify -Dpmd.skip=true
 
 # Run only unit tests
 test-unit:
-	mvn test
+	mvn test -Dpmd.skip=true
 
-# Run only integration tests
+# Run only integration tests (disables PMD checking since it's handled by lint)
 test-integration:
-	mvn verify -Dsurefire.skip=true
+	mvn verify -Dsurefire.skip=true -Dpmd.skip=true
 
 # Build the project
 build:
