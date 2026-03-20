@@ -19,17 +19,14 @@ public class FileSupportExample {
 
     // 2. Create a test
     Test test =
-        new Test(
-            null, // id
-            null, // config
-            "File Test Behavior",
-            "SDK",
-            "Files",
-            TestType.SINGLE_TURN,
-            null, // prompt
-            Map.of(),
-            List.of(tempFile.toString()) // files
-            );
+        Test.builder()
+            .behavior("File Test Behavior")
+            .category("SDK")
+            .topic("Files")
+            .testType(TestType.SINGLE_TURN)
+            .metadata(Map.of())
+            .files(List.of(tempFile.toString()))
+            .build();
 
     Test created = client.tests().create(test);
     System.out.println("Created test: " + created.id());

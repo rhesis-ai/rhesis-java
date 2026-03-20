@@ -100,16 +100,14 @@ class FileIntegrationTest extends BaseIntegrationTest {
 
     // Create a test to attach files to
     ai.rhesis.sdk.entities.Test testToCreate =
-        new ai.rhesis.sdk.entities.Test(
-            null,
-            null,
-            "Integration Test Behavior",
-            "SDK",
-            "Files Integration",
-            TestType.SINGLE_TURN,
-            null,
-            Map.of(),
-            List.of(tempFile.toString()));
+        ai.rhesis.sdk.entities.Test.builder()
+            .behavior("Integration Test Behavior")
+            .category("SDK")
+            .topic("Files Integration")
+            .testType(TestType.SINGLE_TURN)
+            .metadata(Map.of())
+            .files(List.of(tempFile.toString()))
+            .build();
 
     createdTest = client.tests().create(testToCreate);
   }

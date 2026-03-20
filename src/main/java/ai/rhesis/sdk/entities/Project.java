@@ -2,7 +2,9 @@ package ai.rhesis.sdk.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
+@Builder
 public record Project(
     @JsonProperty("id") String id,
     @JsonProperty("name") String name,

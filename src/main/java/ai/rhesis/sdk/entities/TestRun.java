@@ -3,7 +3,9 @@ package ai.rhesis.sdk.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
+import lombok.Builder;
 
+@Builder
 public record TestRun(
     @JsonProperty("id") String id,
     @JsonProperty("test_configuration_id") String testConfigurationId,

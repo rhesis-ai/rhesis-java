@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
+import lombok.Builder;
 
+@Builder
 public record Test(
     @JsonProperty("id") String id,
     @JsonProperty("test_configuration") TestConfiguration testConfiguration,

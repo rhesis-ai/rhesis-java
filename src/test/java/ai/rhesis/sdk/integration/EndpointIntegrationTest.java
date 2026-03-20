@@ -22,20 +22,20 @@ class EndpointIntegrationTest extends BaseIntegrationTest {
   void testEndpointLifecycle() {
     assumeTrue(defaultProjectId != null, "Project ID is required to create an endpoint");
     Endpoint newEndpoint =
-        new Endpoint(
-            null,
-            "Integration Test Endpoint",
-            "Created by Java SDK Integration Tests",
-            ConnectionType.REST,
-            "https://httpbin.org/post",
-            defaultProjectId,
-            "POST",
-            null,
-            Map.of("Content-Type", "application/json", "Authorization", "Bearer {{ auth_token }}"),
-            null,
-            Map.of("message", "{{ input }}"),
-            Map.of("output", "$.data"),
-            "fake-token");
+        Endpoint.builder()
+            .name("Integration Test Endpoint")
+            .description("Created by Java SDK Integration Tests")
+            .connectionType(ConnectionType.REST)
+            .url("https://httpbin.org/post")
+            .projectId(defaultProjectId)
+            .method("POST")
+            .requestHeaders(
+                Map.of(
+                    "Content-Type", "application/json", "Authorization", "Bearer {{ auth_token }}"))
+            .requestMapping(Map.of("message", "{{ input }}"))
+            .responseMapping(Map.of("output", "$.data"))
+            .authToken("fake-token")
+            .build();
 
     Endpoint created = newEndpoint.push();
     assertThat(created).isNotNull();
@@ -53,20 +53,21 @@ class EndpointIntegrationTest extends BaseIntegrationTest {
 
     // Test Update
     Endpoint updatedEndpoint =
-        new Endpoint(
-            created.id(),
-            "Updated Integration Test Endpoint",
-            "Updated by Java SDK Integration Tests",
-            created.connectionType(),
-            created.url(),
-            created.projectId(),
-            created.method(),
-            created.endpointPath(),
-            created.requestHeaders(),
-            created.queryParams(),
-            created.requestMapping(),
-            created.responseMapping(),
-            "new-fake-token");
+        Endpoint.builder()
+            .id(created.id())
+            .name("Updated Integration Test Endpoint")
+            .description("Updated by Java SDK Integration Tests")
+            .connectionType(created.connectionType())
+            .url(created.url())
+            .projectId(created.projectId())
+            .method(created.method())
+            .endpointPath(created.endpointPath())
+            .requestHeaders(created.requestHeaders())
+            .queryParams(created.queryParams())
+            .requestMapping(created.requestMapping())
+            .responseMapping(created.responseMapping())
+            .authToken("new-fake-token")
+            .build();
 
     Endpoint updated = updatedEndpoint.push();
     assertThat(updated).isNotNull();

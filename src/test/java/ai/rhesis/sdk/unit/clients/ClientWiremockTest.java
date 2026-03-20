@@ -262,16 +262,13 @@ class ClientWiremockTest {
                       .withBody("[{\"id\":\"file-1\",\"filename\":\"test.txt\"}]")));
 
       ai.rhesis.sdk.entities.Test testToCreate =
-          new ai.rhesis.sdk.entities.Test(
-              null,
-              null,
-              "Behavior",
-              "Category",
-              "Topic",
-              TestType.SINGLE_TURN,
-              null,
-              null,
-              List.of(tempFile.toString()));
+          ai.rhesis.sdk.entities.Test.builder()
+              .behavior("Behavior")
+              .category("Category")
+              .topic("Topic")
+              .testType(TestType.SINGLE_TURN)
+              .files(List.of(tempFile.toString()))
+              .build();
 
       ai.rhesis.sdk.entities.Test response = testClient.create(testToCreate);
       assertThat(response.id()).isEqualTo("t-new");
