@@ -9,11 +9,18 @@ import ai.rhesis.sdk.entities.File;
 import ai.rhesis.sdk.entities.TestResult;
 import ai.rhesis.sdk.entities.TestRun;
 import ai.rhesis.sdk.entities.TestSet;
+import ai.rhesis.sdk.entities.stats.TestResultStats;
+import ai.rhesis.sdk.entities.stats.TestRunStats;
+import ai.rhesis.sdk.enums.ExecutionMode;
 import ai.rhesis.sdk.enums.RunStatus;
+import ai.rhesis.sdk.enums.TestResultStatsMode;
+import ai.rhesis.sdk.enums.TestRunStatsMode;
 import ai.rhesis.sdk.enums.TestType;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,6 +30,7 @@ class ClientWiremockTest {
   private static TestClient testClient;
   private static TestSetClient testSetClient;
   private static TestRunClient testRunClient;
+  private static TestResultClient testResultClient;
   private static FileClient fileClient;
 
   @BeforeAll
@@ -36,6 +44,7 @@ class ClientWiremockTest {
     testClient = rhesisClient.tests();
     testSetClient = rhesisClient.testSets();
     testRunClient = rhesisClient.testRuns();
+    testResultClient = rhesisClient.testResults();
     fileClient = rhesisClient.files();
   }
 
@@ -93,7 +102,7 @@ class ClientWiremockTest {
 
     TestRun response = testRunClient.get("tr-1");
     assertThat(response.id()).isEqualTo("tr-1");
-    assertThat(response.status()).isEqualTo(RunStatus.COMPLETED.getValue());
+    assertThat(response.status()).isEqualTo("Completed");
   }
 
   @Test
@@ -278,5 +287,290 @@ class ClientWiremockTest {
     } finally {
       java.nio.file.Files.delete(tempFile);
     }
+  }
+
+  @Test
+  void testExecuteTestSet() {
+    stubFor(
+        post(urlEqualTo("/test_sets/ts-1/execute/ep-1"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"test_run_id\":\"tr-new\",\"status\":\"Progress\"}")));
+
+    Map<String, Object> response = testSetClient.execute("ts-1", "ep-1");
+    assertThat(response).containsEntry("test_run_id", "tr-new");
+    assertThat(response).containsEntry("status", "Progress");
+
+    verify(
+        1,
+        postRequestedFor(urlEqualTo("/test_sets/ts-1/execute/ep-1"))
+            .withRequestBody(containing("\"execution_mode\":\"Parallel\"")));
+  }
+
+  @Test
+  void testExecuteTestSetSequential() {
+    stubFor(
+        post(urlEqualTo("/test_sets/ts-1/execute/ep-1"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"test_run_id\":\"tr-seq\"}")));
+
+    Map<String, Object> response =
+        testSetClient.execute("ts-1", "ep-1", ExecutionMode.SEQUENTIAL, null);
+    assertThat(response).containsEntry("test_run_id", "tr-seq");
+
+    verify(
+        1,
+        postRequestedFor(urlEqualTo("/test_sets/ts-1/execute/ep-1"))
+            .withRequestBody(containing("\"execution_mode\":\"Sequential\"")));
+  }
+
+  @Test
+  void testRescoreTestSet() {
+    stubFor(
+        post(urlEqualTo("/test_sets/ts-1/execute/ep-1"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"test_run_id\":\"tr-rescore\"}")));
+
+    Map<String, Object> response = testSetClient.rescore("ts-1", "ep-1", "tr-original");
+    assertThat(response).containsEntry("test_run_id", "tr-rescore");
+
+    verify(
+        1,
+        postRequestedFor(urlEqualTo("/test_sets/ts-1/execute/ep-1"))
+            .withRequestBody(containing("\"reference_test_run_id\":\"tr-original\"")));
+  }
+
+  @Test
+  void testLastRun() {
+    stubFor(
+        get(urlEqualTo("/test_sets/ts-1/last-run/ep-1"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"id\":\"tr-last\",\"name\":\"Run 42\","
+                            + "\"status\":\"Completed\",\"pass_rate\":0.95}")));
+
+    TestRun response = testSetClient.lastRun("ts-1", "ep-1");
+    assertThat(response.id()).isEqualTo("tr-last");
+    assertThat(response.name()).isEqualTo("Run 42");
+    assertThat(response.status()).isEqualTo("Completed");
+    assertThat(response.passRate()).isEqualTo(0.95);
+  }
+
+  @Test
+  void testGetTestRunWithNestedStatus() {
+    stubFor(
+        get(urlEqualTo("/test_runs/tr-nested"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"id\":\"tr-nested\","
+                            + "\"status\":{\"name\":\"Completed\",\"id\":\"s-1\"},"
+                            + "\"name\":\"Run Nested\"}")));
+
+    TestRun response = testRunClient.get("tr-nested");
+    assertThat(response.id()).isEqualTo("tr-nested");
+    assertThat(response.status()).isEqualTo("Completed");
+  }
+
+  @Test
+  void testTestRunStats() {
+    stubFor(
+        get(urlPathEqualTo("/test_runs/stats"))
+            .withQueryParam("mode", equalTo("all"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"overall_summary\":{\"total_runs\":10,\"unique_test_sets\":3,"
+                            + "\"unique_executors\":2,\"most_common_status\":\"Completed\","
+                            + "\"pass_rate\":0.85},"
+                            + "\"status_distribution\":[{\"status\":\"Completed\",\"count\":8,\"percentage\":80.0}],"
+                            + "\"metadata\":{\"mode\":\"all\",\"total_test_runs\":10}}")));
+
+    TestRunStats response = testRunClient.stats();
+    assertThat(response.overallSummary()).isNotNull();
+    assertThat(response.overallSummary().totalRuns()).isEqualTo(10);
+    assertThat(response.overallSummary().passRate()).isEqualTo(0.85);
+    assertThat(response.statusDistribution()).hasSize(1);
+    assertThat(response.statusDistribution().get(0).status()).isEqualTo("Completed");
+    assertThat(response.metadata().totalTestRuns()).isEqualTo(10);
+  }
+
+  @Test
+  void testTestRunStatsWithMode() {
+    stubFor(
+        get(urlPathEqualTo("/test_runs/stats"))
+            .withQueryParam("mode", equalTo("summary"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"overall_summary\":{\"total_runs\":5,\"unique_test_sets\":1,"
+                            + "\"unique_executors\":1,\"most_common_status\":\"Completed\","
+                            + "\"pass_rate\":0.9}}")));
+
+    TestRunStats response = testRunClient.stats(TestRunStatsMode.SUMMARY);
+    assertThat(response.overallSummary()).isNotNull();
+    assertThat(response.overallSummary().totalRuns()).isEqualTo(5);
+  }
+
+  @Test
+  void testTestRunStatsWithRunIds() {
+    stubFor(
+        get(urlPathEqualTo("/test_runs/stats"))
+            .withQueryParam("mode", equalTo("all"))
+            .withQueryParam("test_run_ids", equalTo("tr-1"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"overall_summary\":{\"total_runs\":1,\"unique_test_sets\":1,"
+                            + "\"unique_executors\":1,\"most_common_status\":\"Completed\","
+                            + "\"pass_rate\":1.0}}")));
+
+    TestRunStats response = testRunClient.stats(List.of("tr-1"));
+    assertThat(response.overallSummary()).isNotNull();
+    assertThat(response.overallSummary().totalRuns()).isEqualTo(1);
+  }
+
+  @Test
+  void testTestResultStats() {
+    stubFor(
+        get(urlPathEqualTo("/test_results/stats"))
+            .withQueryParam("mode", equalTo("all"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"overall_pass_rates\":{\"total\":100,\"passed\":85,"
+                            + "\"failed\":15,\"pass_rate\":0.85},"
+                            + "\"metric_pass_rates\":{\"Accuracy\":{\"total\":50,\"passed\":45,"
+                            + "\"failed\":5,\"pass_rate\":0.9}},"
+                            + "\"metadata\":{\"mode\":\"all\",\"total_test_results\":100}}")));
+
+    TestResultStats response = testResultClient.stats();
+    assertThat(response.overallPassRates()).isNotNull();
+    assertThat(response.overallPassRates().total()).isEqualTo(100);
+    assertThat(response.overallPassRates().passRate()).isEqualTo(0.85);
+    assertThat(response.metricPassRates()).containsKey("Accuracy");
+    assertThat(response.metricPassRates().get("Accuracy").passRate()).isEqualTo(0.9);
+    assertThat(response.metadata().totalTestResults()).isEqualTo(100);
+  }
+
+  @Test
+  void testTestResultStatsWithMode() {
+    stubFor(
+        get(urlPathEqualTo("/test_results/stats"))
+            .withQueryParam("mode", equalTo("behavior"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"behavior_pass_rates\":{\"Compliance\":{\"total\":30,\"passed\":28,"
+                            + "\"failed\":2,\"pass_rate\":0.93}}}")));
+
+    TestResultStats response = testResultClient.stats(TestResultStatsMode.BEHAVIOR);
+    assertThat(response.behaviorPassRates()).containsKey("Compliance");
+    assertThat(response.behaviorPassRates().get("Compliance").total()).isEqualTo(30);
+  }
+
+  @Test
+  void testTestResultStatsWithFilters() {
+    stubFor(
+        get(urlPathEqualTo("/test_results/stats"))
+            .withQueryParam("mode", equalTo("all"))
+            .withQueryParam("test_run_ids", equalTo("tr-1"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"overall_pass_rates\":{\"total\":20,\"passed\":18,"
+                            + "\"failed\":2,\"pass_rate\":0.9}}")));
+
+    Map<String, Object> params = Map.of("test_run_ids", List.of("tr-1"));
+    TestResultStats response = testResultClient.stats(TestResultStatsMode.ALL, params);
+    assertThat(response.overallPassRates()).isNotNull();
+    assertThat(response.overallPassRates().total()).isEqualTo(20);
+  }
+
+  @Test
+  void testGetTestSetMetrics() {
+    stubFor(
+        get(urlEqualTo("/test_sets/ts-1/metrics"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("[{\"id\":\"m-1\",\"name\":\"Accuracy\"}]")));
+
+    List<Map<String, Object>> response = testSetClient.getMetrics("ts-1");
+    assertThat(response).hasSize(1);
+    assertThat(response.get(0)).containsEntry("name", "Accuracy");
+  }
+
+  @Test
+  void testAddTestsToTestSet() {
+    stubFor(
+        post(urlEqualTo("/test_sets/ts-1/associate"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"success\":true,\"total_tests\":2}")));
+
+    Map<String, Object> response = testSetClient.addTests("ts-1", List.of("t-1", "t-2"));
+    assertThat(response).containsEntry("success", true);
+
+    verify(
+        1,
+        postRequestedFor(urlEqualTo("/test_sets/ts-1/associate"))
+            .withRequestBody(containing("\"test_ids\"")));
+  }
+
+  @Test
+  void testRemoveTestsFromTestSet() {
+    stubFor(
+        post(urlEqualTo("/test_sets/ts-1/disassociate"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"success\":true,\"removed_associations\":1}")));
+
+    Map<String, Object> response = testSetClient.removeTests("ts-1", List.of("t-1"));
+    assertThat(response).containsEntry("success", true);
   }
 }
