@@ -84,10 +84,16 @@ public class TestRunClient {
         Object value = entry.getValue();
         if (value instanceof List<?> listVal) {
           for (Object item : listVal) {
-            path.append("&").append(encode(entry.getKey())).append("=").append(encode(item.toString()));
+            path.append("&")
+                .append(encode(entry.getKey()))
+                .append("=")
+                .append(encode(item.toString()));
           }
         } else {
-          path.append("&").append(encode(entry.getKey())).append("=").append(encode(value.toString()));
+          path.append("&")
+              .append(encode(entry.getKey()))
+              .append("=")
+              .append(encode(value.toString()));
         }
       }
     }

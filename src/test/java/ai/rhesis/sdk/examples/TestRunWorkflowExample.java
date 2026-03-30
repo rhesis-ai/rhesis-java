@@ -86,7 +86,8 @@ public class TestRunWorkflowExample {
                 .rescore(testSets.get(0).id(), endpoints.get(0).id(), runs.get(0).id());
         System.out.println("Rescore submitted: " + rescoreResult);
       } catch (RhesisApiException e) {
-        System.out.println("Rescore failed (expected if run doesn't belong to this pair): " + e.getMessage());
+        System.out.println(
+            "Rescore failed (expected if run doesn't belong to this pair): " + e.getMessage());
       }
     }
   }

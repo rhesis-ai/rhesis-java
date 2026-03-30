@@ -5,5 +5,4 @@ import lombok.Builder;
 
 @Builder
 public record ExecutorRunCount(
-    @JsonProperty("executor_name") String executorName,
-    @JsonProperty("run_count") int runCount) {}
+    @JsonProperty("executor_name") String executorName, @JsonProperty("run_count") int runCount) {}

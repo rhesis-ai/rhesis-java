@@ -16,8 +16,7 @@ public record ExecutionRequest(
 
   @Builder
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  public record ExecutionOptions(
-      @JsonProperty("execution_mode") ExecutionMode executionMode) {}
+  public record ExecutionOptions(@JsonProperty("execution_mode") ExecutionMode executionMode) {}
 
   public static ExecutionRequest forExecution(
       ExecutionMode mode, List<Map<String, Object>> metrics) {

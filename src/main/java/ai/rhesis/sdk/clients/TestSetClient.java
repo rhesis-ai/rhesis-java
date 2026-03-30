@@ -64,10 +64,7 @@ public class TestSetClient {
    * @return the execution submission response
    */
   public Map<String, Object> execute(
-      String testSetId,
-      String endpointId,
-      ExecutionMode mode,
-      List<Map<String, Object>> metrics) {
+      String testSetId, String endpointId, ExecutionMode mode, List<Map<String, Object>> metrics) {
     if (testSetId == null) {
       throw new IllegalArgumentException("testSetId must be provided");
     }
@@ -172,8 +169,7 @@ public class TestSetClient {
       throw new IllegalArgumentException("metricId must be provided");
     }
     String path = "/test_sets/" + testSetId + "/metrics/" + metricId;
-    return httpClient.post(
-        path, Map.of(), new TypeReference<List<Map<String, Object>>>() {});
+    return httpClient.post(path, Map.of(), new TypeReference<List<Map<String, Object>>>() {});
   }
 
   /**
