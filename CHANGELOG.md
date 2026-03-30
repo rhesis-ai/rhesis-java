@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-03-30
+
+### Added
+- Test set execution support: `execute()`, `rescore()`, and `lastRun()` on `TestSetClient`, matching the Python SDK.
+- `ExecutionMode` enum (`PARALLEL`, `SEQUENTIAL`) and `ExecutionRequest` model for controlling test run execution.
+- Typed stats models for test run analytics (`TestRunStats`, `TestRunOverallSummary`, `StatusDistribution`, `ResultDistribution`, `TestRunTimelineData`, etc.).
+- Typed stats models for test result analytics (`TestResultStats`, `MetricStats`, `OverallStats`, `TimelineData`, `TestRunSummary`, etc.).
+- `TestRunStatsMode` and `TestResultStatsMode` enums for controlling which stat sections are returned.
+- `TestRunClient.stats()` with overloads for mode, run ID filtering, and arbitrary filter params.
+- `TestResultClient.stats()` with mode and 18 filter parameters matching the Python SDK.
+- Test set metric management: `getMetrics()`, `addMetric()`, `removeMetric()` on `TestSetClient`.
+- Test association management: `addTests()`, `removeTests()` on `TestSetClient`.
+- Integration tests for test run lifecycle, execution, and stats (`TestRunIntegrationTest`).
+- WireMock unit tests for all new client methods.
+- Five new runnable examples: `ExecuteTestSetExample`, `TestRunWorkflowExample`, `TestSetMetricsExample`, `TestRunStatsExample`, `TestResultStatsExample`.
+- Examples README with setup instructions and quick reference.
+
+### Changed
+- `TestRun.status` changed from `Object` to `String` with `NameStringDeserializer` to handle both plain string and nested object responses from the API.
+- `TestRun` entity now includes `createdAt`, `nanoId`, `testCount`, and `passRate` fields.
+- Updated project README with new features, all nine examples, and link to examples README.
+
 ## [0.1.1] - 2026-03-20
 
 ### Added
