@@ -50,6 +50,8 @@ The Rhesis Java SDK empowers developers to programmatically access curated test 
 - [Quick Start](#-quick-start)
   - [Generating Custom Test Sets](#generating-custom-test-sets-%EF%B8%8F)
   - [Examples](#examples-)
+    - [Test Execution](#test-execution)
+    - [Analytics & Stats](#analytics--stats)
 - [About Rhesis AI](#-about-rhesis-ai)
 - [Community](#-community-)
 - [Hugging Face](#-hugging-face)
@@ -62,6 +64,9 @@ The Rhesis Java SDK provides programmatic access to the Rhesis testing platform:
 
 - **Access Test Sets**: Browse and load curated test sets across multiple domains and use cases
 - **Generate Test Scenarios**: Create custom test sets from prompts, requirements, or domain knowledge natively using local LLM models
+- **Execute Test Runs**: Trigger test set runs against your endpoints in parallel or sequential mode
+- **Analytics & Stats**: Typed stats for test runs and test results — pass rates by metric, behavior, category, topic, and timeline trends
+- **Manage Metrics & Tests**: Add/remove metrics on test sets, associate/disassociate tests, rescore previous runs
 - **Seamless Integration**: Integrate testing into your Java CI/CD pipeline and development workflow
 - **Comprehensive Coverage**: Scale your testing from dozens to thousands of scenarios
 - **Open Source**: MIT-licensed with full transparency and community-driven development
@@ -258,23 +263,37 @@ If none of the existing test sets fit your needs, you can generate your own. You
 
 ### Examples 💡
 
-Looking for more detailed examples? Check out our runnable examples in the [`src/test/java/ai/rhesis/sdk/examples/`](src/test/java/ai/rhesis/sdk/examples/) directory. These include:
-- [Creating an Endpoint](src/test/java/ai/rhesis/sdk/examples/CreateEndpointExample.java)
-- [Generating a Test Set](src/test/java/ai/rhesis/sdk/examples/GenerateTestSetExample.java)
+Looking for more detailed examples? Check out the full [Examples README](src/test/java/ai/rhesis/sdk/examples/README.md) and runnable examples in [`src/test/java/ai/rhesis/sdk/examples/`](src/test/java/ai/rhesis/sdk/examples/):
 
-You can run these examples directly from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment (it will be automatically picked up from a `.env` file at the root of the project if one exists):
+**Endpoints & Projects**
+- [Creating an Endpoint](src/test/java/ai/rhesis/sdk/examples/CreateEndpointExample.java) — Look up a project and create a REST endpoint with request/response mappings
+
+**Test Generation**
+- [Generating a Test Set](src/test/java/ai/rhesis/sdk/examples/GenerateTestSetExample.java) — Configure a synthesizer, generate tests, and push to Rhesis
+- [Generate Test Set with Files](src/test/java/ai/rhesis/sdk/examples/GenerateTestSetWithFilesExample.java) — Generate tests and attach files to each one
+
+**File Management**
+- [File Support](src/test/java/ai/rhesis/sdk/examples/FileSupportExample.java) — Create tests with file attachments, download content, and clean up
+
+**Test Execution**
+- [Execute a Test Set](src/test/java/ai/rhesis/sdk/examples/ExecuteTestSetExample.java) — Trigger runs in parallel or sequential mode, with custom metrics
+- [Test Run Workflow](src/test/java/ai/rhesis/sdk/examples/TestRunWorkflowExample.java) — Full lifecycle: list runs, inspect results, get last run, rescore
+
+**Test Set Management**
+- [Test Set Metrics](src/test/java/ai/rhesis/sdk/examples/TestSetMetricsExample.java) — List, add, and remove metrics; associate and disassociate tests
+
+**Analytics & Stats**
+- [Test Run Stats](src/test/java/ai/rhesis/sdk/examples/TestRunStatsExample.java) — Overall summary, status distribution, most-run test sets, timeline, filtered queries
+- [Test Result Stats](src/test/java/ai/rhesis/sdk/examples/TestResultStatsExample.java) — Pass rates by metric, behavior, category, and topic; per-run summaries and timeline trends
+
+You can run any example from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment (it will be automatically picked up from a `.env` file at the root of the project if one exists):
 
 ```bash
 # Ensure the examples are compiled
 mvn clean test-compile
 
-# Run the Create Endpoint example
-mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="ai.rhesis.sdk.examples.CreateEndpointExample"
-```
-
-To run the multi-turn synthesizer example:
-```bash
-mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="ai.rhesis.sdk.examples.GenerateTestSetExample"
+# Run any example
+mvn exec:java -Dexec.classpathScope=test -Dexec.mainClass="ai.rhesis.sdk.examples.ExecuteTestSetExample"
 ```
 
 ## 🧪 About Rhesis AI
