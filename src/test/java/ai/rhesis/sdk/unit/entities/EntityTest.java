@@ -145,20 +145,22 @@ class EntityTest {
   @Test
   void testTestRunSerialization() throws Exception {
     TestRun testRun =
-        new TestRun(
-            "run-1",
-            "config-1",
-            "My Run",
-            "user-1",
-            "org-1",
-            ai.rhesis.sdk.enums.RunStatus.COMPLETED,
-            Map.of("k", "v"),
-            "owner-1",
-            "assignee-1");
+        TestRun.builder()
+            .id("run-1")
+            .testConfigurationId("config-1")
+            .name("My Run")
+            .userId("user-1")
+            .organizationId("org-1")
+            .status("Completed")
+            .attributes(Map.of("k", "v"))
+            .ownerId("owner-1")
+            .assigneeId("assignee-1")
+            .build();
     String json = mapper.writeValueAsString(testRun);
     TestRun parsed = mapper.readValue(json, TestRun.class);
     assertThat(parsed.id()).isEqualTo("run-1");
     assertThat(parsed.name()).isEqualTo("My Run");
+    assertThat(parsed.status()).isEqualTo("Completed");
   }
 
   @Test
