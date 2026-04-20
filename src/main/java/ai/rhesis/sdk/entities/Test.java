@@ -1,6 +1,7 @@
 package ai.rhesis.sdk.entities;
 
 import ai.rhesis.sdk.enums.TestType;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
@@ -25,7 +26,10 @@ public record Test(
         String topic,
     @JsonProperty("test_type") TestType testType,
     @JsonProperty("prompt") Prompt prompt,
-    @JsonProperty("metadata") Map<String, Object> metadata,
+    // Backend accepts "metadata" on POST but returns "test_metadata" on GET responses
+    // (renamed to avoid colliding with SQLAlchemy's reserved Model.metadata). The Python
+    // SDK maps "test_metadata" -> "metadata" client-side; we do the same via @JsonAlias.
+    @JsonProperty("metadata") @JsonAlias("test_metadata") Map<String, Object> metadata,
     @JsonProperty("files") List<String> files)
     implements BaseEntity<Test> {
 
