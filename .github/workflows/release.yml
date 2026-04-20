@@ -81,23 +81,18 @@ jobs:
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -z "$LAST_TAG" ]; then
             echo "No previous tag found; using full history."
-            git log --pretty=format:"- %s (%h)" > /tmp/commits.txt
+            COMMITS=$(git log --pretty=format:"- %s (%h)")
           else
             echo "Collecting commits in ${LAST_TAG}..HEAD"
-            git log "${LAST_TAG}..HEAD" --pretty=format:"- %s (%h)" > /tmp/commits.txt
+            COMMITS=$(git log "${LAST_TAG}..HEAD" --pretty=format:"- %s (%h)")
           fi
           echo "last_tag=${LAST_TAG}" >> "$GITHUB_OUTPUT"
-
-      - name: Extract [Unreleased] section from CHANGELOG
-        run: |
-          python3 - <<'PY'
-          import re
-          from pathlib import Path
-          content = Path('CHANGELOG.md').read_text()
-          m = re.search(r'## \[Unreleased\][^\n]*\n(.*?)(?=\n## \[|\Z)', content, re.DOTALL)
-          notes = m.group(1).strip() if m else ""
-          Path('/tmp/unreleased.md').write_text(notes)
-          PY
+          # Store multi-line value in GITHUB_ENV for the next step
+          {
+            echo 'GIT_COMMITS<<GIT_COMMITS_EOF'
+            echo "$COMMITS"
+            echo 'GIT_COMMITS_EOF'
+          } >> "$GITHUB_ENV"
 
       - name: Generate changelog entry with Gemini
         env:
@@ -105,88 +100,90 @@ jobs:
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          set -euo pipefail
-          DATE=$(date -u +%Y-%m-%d)
-          COMMITS=$(cat /tmp/commits.txt)
+          python3 - <<'PY'
+          import json, os, re, sys, time, urllib.error, urllib.request
+          from datetime import date
+          from pathlib import Path
 
-          UNRELEASED=$(cat /tmp/unreleased.md)
-          UNRELEASED_SECTION=""
-          if [ -n "$UNRELEASED" ]; then
-            UNRELEASED_SECTION="Curated [Unreleased] notes (incorporate these — do not duplicate):
-          ${UNRELEASED}
+          version  = os.environ["VERSION"]
+          api_key  = os.environ["GEMINI_API_KEY"]
+          model    = os.environ.get("GEMINI_MODEL") or "gemini-2.5-flash"
+          commits  = os.environ.get("GIT_COMMITS", "").strip()
+          today    = date.today().strftime("%Y-%m-%d")
 
-          "
-          fi
-
-          PROMPT=$(cat <<EOF
-          You are generating a release changelog entry for the Rhesis Java SDK, following the Keep a Changelog format (https://keepachangelog.com/en/1.0.0/).
-
-          Version: ${VERSION}
-          Date: ${DATE}
-
-          ${UNRELEASED_SECTION}Commits since last release:
-          ${COMMITS}
-
-          Requirements:
-          - Start the entry with the exact header "## [${VERSION}] - ${DATE}".
-          - Group bullets under "### Added", "### Changed", "### Fixed", "### Removed", "### Deprecated", "### Security" as appropriate. Omit any empty section.
-          - Write concise, user-facing bullets. Collapse related commits and any curated [Unreleased] notes into a single unified entry. Drop purely internal noise (formatting, CI tweaks, version bumps) unless significant.
-          - Use backticks around code identifiers (classes, methods, files).
-          - Output ONLY the markdown for the new entry. No preamble, no trailing commentary, no code fences.
-          EOF
+          # Extract [Unreleased] section directly from CHANGELOG — no temp file
+          changelog = Path("CHANGELOG.md").read_text()
+          m = re.search(r"## \[Unreleased\][^\n]*\n(.*?)(?=\n## \[|\Z)", changelog, re.DOTALL)
+          unreleased = m.group(1).strip() if m else ""
+          unreleased_section = (
+              f"Curated [Unreleased] notes (incorporate these — do not duplicate):\n{unreleased}\n\n"
+              if unreleased else ""
           )
 
-          jq -n --arg p "$PROMPT" '{contents:[{parts:[{text:$p}]}]}' > /tmp/gemini-request.json
+          prompt = (
+              f"You are generating a release changelog entry for the Rhesis Java SDK, "
+              f"following the Keep a Changelog format (https://keepachangelog.com/en/1.0.0/).\n\n"
+              f"Version: {version}\nDate: {today}\n\n"
+              f"{unreleased_section}"
+              f"Commits since last release:\n{commits}\n\n"
+              f"Requirements:\n"
+              f'- Start the entry with the exact header "## [{version}] - {today}".\n'
+              f"- Group bullets under \"### Added\", \"### Changed\", \"### Fixed\", "
+              f"\"### Removed\", \"### Deprecated\", \"### Security\" as appropriate. "
+              f"Omit any empty section.\n"
+              f"- Write concise, user-facing bullets. Collapse related commits and any "
+              f"curated [Unreleased] notes into a single unified entry. Drop purely internal "
+              f"noise (formatting, CI tweaks, version bumps) unless significant.\n"
+              f"- Use backticks around code identifiers (classes, methods, files).\n"
+              f"- Output ONLY the markdown for the new entry. No preamble, no trailing "
+              f"commentary, no code fences."
+          )
 
-          MODEL="${GEMINI_MODEL:-gemini-2.5-flash}"
-          HTTP_CODE=""
-          for attempt in 1 2 3 4; do
-            HTTP_CODE=$(curl -sS -o /tmp/gemini-response.json -w "%{http_code}" -X POST \
-              "https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}" \
-              -H "Content-Type: application/json" \
-              --data-binary @/tmp/gemini-request.json)
-            if [ "$HTTP_CODE" = "200" ]; then
-              break
-            fi
-            if ! echo "$HTTP_CODE" | grep -Eq '^(429|5[0-9]{2})$'; then
-              break
-            fi
-            if [ "$attempt" -lt 4 ]; then
-              SLEEP=$((2 ** attempt))
-              echo "Gemini returned HTTP ${HTTP_CODE} on attempt ${attempt}, retrying in ${SLEEP}s..."
-              sleep "$SLEEP"
-            fi
-          done
+          payload = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode()
+          url = (
+              f"https://generativelanguage.googleapis.com/v1beta/models/"
+              f"{model}:generateContent?key={api_key}"
+          )
 
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::Gemini API returned HTTP ${HTTP_CODE} after retries"
-            cat /tmp/gemini-response.json
-            exit 1
-          fi
+          entry = ""
+          for attempt in range(1, 5):
+              try:
+                  req = urllib.request.Request(
+                      url, data=payload, headers={"Content-Type": "application/json"}
+                  )
+                  with urllib.request.urlopen(req, timeout=60) as resp:
+                      data = json.load(resp)
+                  entry = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                  break
+              except urllib.error.HTTPError as exc:
+                  if exc.code not in (429, 500, 502, 503, 504) or attempt == 4:
+                      body = exc.read().decode(errors="replace")
+                      print(f"::error::Gemini HTTP {exc.code}:\n{body}", file=sys.stderr)
+                      sys.exit(1)
+                  sleep = 2 ** attempt
+                  print(f"Gemini returned HTTP {exc.code} on attempt {attempt}, retrying in {sleep}s...")
+                  time.sleep(sleep)
 
-          jq -r '.candidates[0].content.parts[0].text // empty' /tmp/gemini-response.json > /tmp/entry.raw.md
+          if not entry:
+              print("::error::Gemini returned an empty changelog entry", file=sys.stderr)
+              sys.exit(1)
 
-          if [ ! -s /tmp/entry.raw.md ]; then
-            echo "::error::Gemini returned empty changelog entry"
-            cat /tmp/gemini-response.json
-            exit 1
-          fi
-
-          python3 - <<'PY' > /tmp/entry.md
-          import re
-          from pathlib import Path
-          text = Path('/tmp/entry.raw.md').read_text().strip()
-          m = re.match(r"^```(?:markdown)?\s*\n(.*?)\n```$", text, re.DOTALL)
+          # Strip accidental code fences
+          m = re.match(r"^```(?:markdown)?\s*\n(.*?)\n```$", entry, re.DOTALL)
           if m:
-              text = m.group(1).strip()
-          print(text)
-          PY
+              entry = m.group(1).strip()
 
-          if ! grep -q "^## \[${VERSION}\]" /tmp/entry.md; then
-            echo "::error::Generated entry does not start with the expected '## [${VERSION}]' header"
-            cat /tmp/entry.md
-            exit 1
-          fi
+          if not re.search(rf"^## \[{re.escape(version)}\]", entry, re.MULTILINE):
+              print(
+                  f"::error::Generated entry does not start with '## [{version}]':\n{entry}",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          # Only file written — required for the cross-job artifact
+          Path("/tmp/entry.md").write_text(entry)
+          print(f"Changelog entry written ({len(entry)} chars).")
+          PY
 
       - name: Upload changelog entry
         uses: actions/upload-artifact@v4
