@@ -6,21 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.1.3] - 2026-04-20
-### Added
-- Implemented `File` API capabilities, consistent with the Python SDK.
-- Introduced support for test set execution and management.
-- Added typed stats models and client methods for analytics.
-- Expanded core execution entities and local synthesizers.
-- Provided new documentation examples for execution, stats, and metrics.
-- Included Java 21 installation instructions and noted the Java SDK's scope relative to the Python SDK.
+
+_Release automation bootstrap. No user-facing SDK changes._
 
 ### Changed
-- **Breaking Change**: Renamed the base package from `com.rhesis` to `ai.rhesis`. Users must update their import statements.
-- Updated installation instructions to utilize JitPack.
-- Enhanced the `README` with `.env` file configuration details.
-
-### Fixed
-- Improved `TestRun` status deserialization and added missing fields to the `TestRun` entity.
+- Added an automated release workflow (`.github/workflows/release.yml`) that bumps the version, generates the `CHANGELOG.md` entry via Gemini, publishes to GitHub Packages, and creates the GitHub Release behind an approval gate.
+- Fixed Maven authentication in `.github/workflows/publish.yml` so manual publishes to GitHub Packages work; removed its `release: published` trigger to avoid duplicate deploys.
 
 ## [0.1.2] - 2026-03-30
 
