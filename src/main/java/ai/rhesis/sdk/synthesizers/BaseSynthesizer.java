@@ -76,13 +76,11 @@ public abstract class BaseSynthesizer {
 
     for (Map<String, Object> flat : flatTests) {
       Prompt promptObj =
-          new Prompt(
-              null,
-              (String) flat.get("prompt_content"),
-              "user", // defaulting to user for single turn
-              Map.of(
-                  "expected_response", flat.get("prompt_expected_response"),
-                  "language_code", flat.get("prompt_language_code")));
+          Prompt.builder()
+              .content((String) flat.get("prompt_content"))
+              .expectedResponse((String) flat.get("prompt_expected_response"))
+              .languageCode((String) flat.get("prompt_language_code"))
+              .build();
 
       tests.add(
           new Test(

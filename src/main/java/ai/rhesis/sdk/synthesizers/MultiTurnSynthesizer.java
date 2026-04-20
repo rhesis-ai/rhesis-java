@@ -82,14 +82,17 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
     List<Map<String, Object>> flatTests = (List<Map<String, Object>>) props.get("tests");
 
     for (Map<String, Object> flat : flatTests) {
+      Number rawMin = (Number) flat.get("test_configuration_min_turns");
+      Number rawMax = (Number) flat.get("test_configuration_max_turns");
       TestConfiguration testConfig =
-          new TestConfiguration(
-              (String) flat.get("test_configuration_goal"),
-              (String) flat.get("test_configuration_instructions"),
-              (String) flat.get("test_configuration_restrictions"),
-              (String) flat.get("test_configuration_scenario"),
-              ((Number) flat.get("test_configuration_min_turns")).intValue(),
-              ((Number) flat.get("test_configuration_max_turns")).intValue());
+          TestConfiguration.builder()
+              .goal((String) flat.get("test_configuration_goal"))
+              .instructions((String) flat.get("test_configuration_instructions"))
+              .restrictions((String) flat.get("test_configuration_restrictions"))
+              .scenario((String) flat.get("test_configuration_scenario"))
+              .minTurns(rawMin != null ? rawMin.intValue() : null)
+              .maxTurns(rawMax != null ? rawMax.intValue() : null)
+              .build();
 
       tests.add(
           new Test(

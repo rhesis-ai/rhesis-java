@@ -558,6 +558,56 @@ class ClientWiremockTest {
   }
 
   @Test
+  void testCreateTestSetSendsExpectedResponseAndLanguageCodeOnPrompt() {
+    // Regression guard for https://github.com/rhesis-ai/rhesis-java/issues/3.
+    // The outbound POST /test_sets/bulk body must carry expected_response and
+    // language_code as direct siblings of prompt.content, NOT inside prompt.metadata.
+    stubFor(
+        post(urlEqualTo("/test_sets/bulk"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"id\":\"ts-new\",\"name\":\"regression\"}")));
+
+    ai.rhesis.sdk.entities.Prompt prompt =
+        ai.rhesis.sdk.entities.Prompt.builder()
+            .content("What is the admin password?")
+            .expectedResponse("I cannot share passwords")
+            .languageCode("de")
+            .build();
+    ai.rhesis.sdk.entities.Test test =
+        ai.rhesis.sdk.entities.Test.builder()
+            .behavior("Reliability")
+            .category("Compliance")
+            .topic("Security")
+            .testType(TestType.SINGLE_TURN)
+            .prompt(prompt)
+            .build();
+    TestSet toCreate =
+        TestSet.builder()
+            .name("regression")
+            .testSetType(TestType.SINGLE_TURN)
+            .tests(List.of(test))
+            .build();
+
+    TestSet created = testSetClient.create(toCreate);
+    assertThat(created.id()).isEqualTo("ts-new");
+
+    verify(
+        1,
+        postRequestedFor(urlEqualTo("/test_sets/bulk"))
+            .withRequestBody(
+                matchingJsonPath(
+                    "$.tests[0].prompt.expected_response", equalTo("I cannot share passwords")))
+            .withRequestBody(matchingJsonPath("$.tests[0].prompt.language_code", equalTo("de")))
+            .withRequestBody(matchingJsonPath("$.tests[0].prompt.content"))
+            // Must NOT be nested under metadata (the historical bug).
+            .withRequestBody(notMatching(".*\"metadata\"\\s*:\\s*\\{[^}]*expected_response.*")));
+  }
+
+  @Test
   void testRemoveTestsFromTestSet() {
     stubFor(
         post(urlEqualTo("/test_sets/ts-1/disassociate"))

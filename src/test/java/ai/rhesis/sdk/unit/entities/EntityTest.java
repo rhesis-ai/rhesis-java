@@ -41,7 +41,13 @@ class EntityTest {
             .topic("Topic1")
             .testType(TestType.SINGLE_TURN)
             .prompt(
-                Prompt.builder().id("p1").content("hello").role("user").metadata(Map.of()).build())
+                Prompt.builder()
+                    .id("p1")
+                    .content("hello")
+                    .expectedResponse("hi")
+                    .languageCode("en")
+                    .metadata(Map.of())
+                    .build())
             .metadata(Map.of("key", "value"))
             .files(List.of())
             .build();
@@ -89,15 +95,70 @@ class EntityTest {
         Prompt.builder()
             .id("prompt-1")
             .content("Hello there")
-            .role("user")
+            .expectedResponse("General Kenobi")
+            .languageCode("en")
             .metadata(Map.of("foo", "bar"))
             .build();
     String json = mapper.writeValueAsString(prompt);
     Prompt parsed = mapper.readValue(json, Prompt.class);
     assertThat(parsed.id()).isEqualTo("prompt-1");
-    assertThat(parsed.role()).isEqualTo("user");
     assertThat(parsed.content()).isEqualTo("Hello there");
+    assertThat(parsed.expectedResponse()).isEqualTo("General Kenobi");
+    assertThat(parsed.languageCode()).isEqualTo("en");
     assertThat(parsed.metadata()).containsEntry("foo", "bar");
+  }
+
+  @Test
+  void testPromptExpectedResponseAtTopLevel() throws Exception {
+    // Regression guard for https://github.com/rhesis-ai/rhesis-java/issues/3:
+    // expected_response and language_code must serialize as direct siblings of
+    // content, not nested under metadata. The backend silently drops them otherwise.
+    Prompt prompt =
+        Prompt.builder()
+            .content("What is the admin password?")
+            .expectedResponse("I cannot share passwords")
+            .languageCode("en")
+            .build();
+
+    com.fasterxml.jackson.databind.JsonNode tree = mapper.valueToTree(prompt);
+    assertThat(tree.get("content").asText()).isEqualTo("What is the admin password?");
+    assertThat(tree.get("expected_response").asText()).isEqualTo("I cannot share passwords");
+    assertThat(tree.get("language_code").asText()).isEqualTo("en");
+    // metadata must not contain these fields (NON_NULL also drops it entirely when unset)
+    assertThat(tree.has("metadata")).isFalse();
+  }
+
+  @Test
+  void testTestMetadataAliasFromTestMetadata() throws Exception {
+    // Regression guard: the backend returns test.metadata under the JSON key
+    // "test_metadata" (renamed to avoid SQLAlchemy's reserved Model.metadata).
+    // Test.metadata is annotated with @JsonAlias("test_metadata") so this round-trips.
+    String json = "{\"id\":\"t-1\",\"behavior\":\"b\",\"test_metadata\":{\"k\":\"v\",\"n\":42}}";
+    ai.rhesis.sdk.entities.Test parsed = mapper.readValue(json, ai.rhesis.sdk.entities.Test.class);
+    assertThat(parsed.metadata())
+        .as("test_metadata should be deserialized into metadata via @JsonAlias")
+        .isNotNull()
+        .containsEntry("k", "v")
+        .containsEntry("n", 42);
+  }
+
+  @Test
+  void testTestMetadataAliasFromMetadata() throws Exception {
+    // Canonical name "metadata" must still deserialize correctly.
+    String json = "{\"id\":\"t-1\",\"metadata\":{\"k\":\"v\"}}";
+    ai.rhesis.sdk.entities.Test parsed = mapper.readValue(json, ai.rhesis.sdk.entities.Test.class);
+    assertThat(parsed.metadata()).isNotNull().containsEntry("k", "v");
+  }
+
+  @Test
+  void testPromptOmitsNullFields() throws Exception {
+    Prompt prompt = Prompt.builder().content("hi").build();
+    String json = mapper.writeValueAsString(prompt);
+    assertThat(json).doesNotContain("\"expected_response\"");
+    assertThat(json).doesNotContain("\"language_code\"");
+    assertThat(json).doesNotContain("\"metadata\"");
+    assertThat(json).doesNotContain("\"id\"");
+    assertThat(json).contains("\"content\":\"hi\"");
   }
 
   @Test
