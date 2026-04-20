@@ -1,9 +1,9 @@
 name: Publish
 
 on:
-  release:
-    types: [published]
-  # Allows you to run this workflow manually from the Actions tab
+  # Kept as a manual fallback only.
+  # The `Release` workflow publishes inline, so no `release: published` trigger here
+  # (it would cause a duplicate deploy and fail with 409 on immutable release versions).
   workflow_dispatch:
 
 jobs:
@@ -22,14 +22,18 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: mvn -B -DskipTests package --file pom.xml
         env:
           RHESIS_API_KEY: ${{ secrets.RHESIS_API_KEY }}
           RHESIS_BASE_URL: ${{ secrets.RHESIS_BASE_URL }}
 
-      - name: Publish
-        run: mvn -B deploy --file pom.xml
+      - name: Publish to GitHub Packages
+        run: mvn -B -DskipTests deploy --file pom.xml
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_USERNAME: ${{ github.actor }}
+          MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

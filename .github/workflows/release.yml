@@ -1,0 +1,291 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Which part of the semver to bump"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      current: ${{ steps.version.outputs.current }}
+      last_tag: ${{ steps.commits.outputs.last_tag }}
+    steps:
+      - name: Generate rheo-app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RHEO_APP_ID }}
+          private-key: ${{ secrets.RHEO_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Compute next version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+          CURRENT=$(mvn -B -q -DforceStdout help:evaluate -Dexpression=project.version)
+          if [ -z "$CURRENT" ]; then
+            echo "::error::Failed to read current version from pom.xml"
+            exit 1
+          fi
+          VERSION=$(npx --yes --package=semver -- semver -i "$BUMP" "$CURRENT")
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to bump '$CURRENT' with '$BUMP' (not a valid semver?)"
+            exit 1
+          fi
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "::error::Tag v${VERSION} already exists"
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "current=${CURRENT}" >> "$GITHUB_OUTPUT"
+
+      - name: Collect commits since last tag
+        id: commits
+        run: |
+          set -euo pipefail
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LAST_TAG" ]; then
+            echo "No previous tag found; using full history."
+            git log --pretty=format:"- %s (%h)" > /tmp/commits.txt
+          else
+            echo "Collecting commits in ${LAST_TAG}..HEAD"
+            git log "${LAST_TAG}..HEAD" --pretty=format:"- %s (%h)" > /tmp/commits.txt
+          fi
+          echo "last_tag=${LAST_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog entry with Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          DATE=$(date -u +%Y-%m-%d)
+          COMMITS=$(cat /tmp/commits.txt)
+
+          PROMPT=$(cat <<EOF
+          You are generating a release changelog entry for the Rhesis Java SDK, following the Keep a Changelog format (https://keepachangelog.com/en/1.0.0/).
+
+          Version: ${VERSION}
+          Date: ${DATE}
+
+          Commits since last release:
+          ${COMMITS}
+
+          Requirements:
+          - Start the entry with the exact header "## [${VERSION}] - ${DATE}".
+          - Group bullets under "### Added", "### Changed", "### Fixed", "### Removed", "### Deprecated", "### Security" as appropriate. Omit any empty section.
+          - Write concise, user-facing bullets. Collapse related commits. Drop purely internal noise (formatting, CI tweaks, version bumps) unless significant.
+          - Use backticks around code identifiers (classes, methods, files).
+          - Output ONLY the markdown for the new entry. No preamble, no trailing commentary, no code fences.
+          EOF
+          )
+
+          jq -n --arg p "$PROMPT" '{contents:[{parts:[{text:$p}]}]}' > /tmp/gemini-request.json
+
+          HTTP_CODE=$(curl -sS -o /tmp/gemini-response.json -w "%{http_code}" -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/gemini-request.json)
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Gemini API returned HTTP ${HTTP_CODE}"
+            cat /tmp/gemini-response.json
+            exit 1
+          fi
+
+          jq -r '.candidates[0].content.parts[0].text // empty' /tmp/gemini-response.json > /tmp/entry.raw.md
+
+          if [ ! -s /tmp/entry.raw.md ]; then
+            echo "::error::Gemini returned empty changelog entry"
+            cat /tmp/gemini-response.json
+            exit 1
+          fi
+
+          python3 - <<'PY' > /tmp/entry.md
+          import re
+          from pathlib import Path
+          text = Path('/tmp/entry.raw.md').read_text().strip()
+          m = re.match(r"^```(?:markdown)?\s*\n(.*?)\n```$", text, re.DOTALL)
+          if m:
+              text = m.group(1).strip()
+          print(text)
+          PY
+
+          if ! grep -q "^## \[${VERSION}\]" /tmp/entry.md; then
+            echo "::error::Generated entry does not start with the expected '## [${VERSION}]' header"
+            cat /tmp/entry.md
+            exit 1
+          fi
+
+      - name: Upload changelog entry
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-entry
+          path: /tmp/entry.md
+          retention-days: 7
+
+      - name: Write approval summary
+        env:
+          CURRENT: ${{ steps.version.outputs.current }}
+          VERSION: ${{ steps.version.outputs.version }}
+          BUMP: ${{ inputs.bump }}
+          LAST_TAG: ${{ steps.commits.outputs.last_tag }}
+        run: |
+          {
+            echo "# Release candidate ready for approval"
+            echo ""
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Current version | \`${CURRENT}\` |"
+            echo "| Bump | \`${BUMP}\` |"
+            echo "| **New version** | **\`${VERSION}\`** |"
+            echo "| Git tag to create | \`v${VERSION}\` |"
+            echo "| Previous tag | \`${LAST_TAG:-<none>}\` |"
+            echo ""
+            echo "## Proposed CHANGELOG entry"
+            echo ""
+            cat /tmp/entry.md
+            echo ""
+            echo "---"
+            echo ""
+            echo "**Approve the \`release\` job to:**"
+            echo "1. Prepend this entry to \`CHANGELOG.md\`"
+            echo "2. Bump \`pom.xml\` to \`${VERSION}\`"
+            echo "3. Commit, tag \`v${VERSION}\`, and push to \`${GITHUB_REF_NAME}\`"
+            echo "4. Build and publish to GitHub Packages"
+            echo "5. Create the GitHub Release"
+            echo ""
+            echo "Reject the deployment to abort the release."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  release:
+    name: Publish release
+    needs: prepare
+    runs-on: ubuntu-latest
+    environment: release
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - name: Generate rheo-app token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RHEO_APP_ID }}
+          private-key: ${{ secrets.RHEO_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Configure git
+        run: |
+          git config user.name "rheo-app[bot]"
+          git config user.email "237771051+rheo-app[bot]@users.noreply.github.com"
+
+      - name: Re-check tag is still available
+        run: |
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "::error::Tag v${VERSION} was created between prepare and approval"
+            exit 1
+          fi
+
+      - name: Download changelog entry
+        uses: actions/download-artifact@v4
+        with:
+          name: release-entry
+          path: /tmp/
+
+      - name: Prepend entry to CHANGELOG.md
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          entry = Path('/tmp/entry.md').read_text().strip() + "\n"
+          path = Path('CHANGELOG.md')
+          content = path.read_text()
+          marker = "\n## ["
+          idx = content.find(marker)
+          if idx == -1:
+              new = content.rstrip() + "\n\n" + entry
+          else:
+              new = content[:idx + 1] + entry + "\n" + content[idx + 1:]
+          path.write_text(new)
+          PY
+
+      - name: Bump pom.xml version
+        run: mvn -B -q versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
+
+      - name: Commit, tag and push
+        run: |
+          set -euo pipefail
+          git add pom.xml CHANGELOG.md
+          git commit -m "chore(release): bump version to ${VERSION} and update CHANGELOG"
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "v${VERSION}"
+
+      - name: Build
+        run: mvn -B -DskipTests package --file pom.xml
+
+      - name: Publish to GitHub Packages
+        env:
+          MAVEN_USERNAME: ${{ github.actor }}
+          MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -B -DskipTests deploy --file pom.xml
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes-file /tmp/entry.md \
+            --verify-tag
