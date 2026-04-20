@@ -91,6 +91,7 @@ jobs:
       - name: Generate changelog entry with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
@@ -117,13 +118,28 @@ jobs:
 
           jq -n --arg p "$PROMPT" '{contents:[{parts:[{text:$p}]}]}' > /tmp/gemini-request.json
 
-          HTTP_CODE=$(curl -sS -o /tmp/gemini-response.json -w "%{http_code}" -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}" \
-            -H "Content-Type: application/json" \
-            --data-binary @/tmp/gemini-request.json)
+          MODEL="${GEMINI_MODEL:-gemini-2.5-flash}"
+          HTTP_CODE=""
+          for attempt in 1 2 3 4; do
+            HTTP_CODE=$(curl -sS -o /tmp/gemini-response.json -w "%{http_code}" -X POST \
+              "https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}" \
+              -H "Content-Type: application/json" \
+              --data-binary @/tmp/gemini-request.json)
+            if [ "$HTTP_CODE" = "200" ]; then
+              break
+            fi
+            if ! echo "$HTTP_CODE" | grep -Eq '^(429|5[0-9]{2})$'; then
+              break
+            fi
+            if [ "$attempt" -lt 4 ]; then
+              SLEEP=$((2 ** attempt))
+              echo "Gemini returned HTTP ${HTTP_CODE} on attempt ${attempt}, retrying in ${SLEEP}s..."
+              sleep "$SLEEP"
+            fi
+          done
 
           if [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::Gemini API returned HTTP ${HTTP_CODE}"
+            echo "::error::Gemini API returned HTTP ${HTTP_CODE} after retries"
             cat /tmp/gemini-response.json
             exit 1
           fi
