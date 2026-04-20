@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-04-20
+### Added
+- Implemented `File` API capabilities, consistent with the Python SDK.
+- Introduced support for test set execution and management.
+- Added typed stats models and client methods for analytics.
+- Expanded core execution entities and local synthesizers.
+- Provided new documentation examples for execution, stats, and metrics.
+- Included Java 21 installation instructions and noted the Java SDK's scope relative to the Python SDK.
+
+### Changed
+- **Breaking Change**: Renamed the base package from `com.rhesis` to `ai.rhesis`. Users must update their import statements.
+- Updated installation instructions to utilize JitPack.
+- Enhanced the `README` with `.env` file configuration details.
+
+### Fixed
+- Improved `TestRun` status deserialization and added missing fields to the `TestRun` entity.
+
 ## [0.1.2] - 2026-03-30
 
 ### Added
