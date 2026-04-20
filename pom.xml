@@ -7,6 +7,39 @@
     <groupId>ai.rhesis</groupId>
     <artifactId>rhesis-java</artifactId>
     <version>0.1.4</version>
+    <packaging>jar</packaging>
+
+    <name>Rhesis Java SDK</name>
+    <description>
+        Java SDK for the Rhesis AI testing platform. Provides a type-safe client
+        for managing test sets, test runs, endpoints, and evaluation results via
+        the Rhesis REST API.
+    </description>
+    <url>https://github.com/rhesis-ai/rhesis-java</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>rhesis-ai</id>
+            <name>Rhesis AI</name>
+            <organization>Rhesis AI</organization>
+            <organizationUrl>https://rhesis.ai</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/rhesis-ai/rhesis-java.git</connection>
+        <developerConnection>scm:git:ssh://github.com/rhesis-ai/rhesis-java.git</developerConnection>
+        <url>https://github.com/rhesis-ai/rhesis-java/tree/main</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
