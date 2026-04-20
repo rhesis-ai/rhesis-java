@@ -88,6 +88,17 @@ jobs:
           fi
           echo "last_tag=${LAST_TAG}" >> "$GITHUB_OUTPUT"
 
+      - name: Extract [Unreleased] section from CHANGELOG
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          content = Path('CHANGELOG.md').read_text()
+          m = re.search(r'## \[Unreleased\][^\n]*\n(.*?)(?=\n## \[|\Z)', content, re.DOTALL)
+          notes = m.group(1).strip() if m else ""
+          Path('/tmp/unreleased.md').write_text(notes)
+          PY
+
       - name: Generate changelog entry with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -98,19 +109,28 @@ jobs:
           DATE=$(date -u +%Y-%m-%d)
           COMMITS=$(cat /tmp/commits.txt)
 
+          UNRELEASED=$(cat /tmp/unreleased.md)
+          UNRELEASED_SECTION=""
+          if [ -n "$UNRELEASED" ]; then
+            UNRELEASED_SECTION="Curated [Unreleased] notes (incorporate these — do not duplicate):
+          ${UNRELEASED}
+
+          "
+          fi
+
           PROMPT=$(cat <<EOF
           You are generating a release changelog entry for the Rhesis Java SDK, following the Keep a Changelog format (https://keepachangelog.com/en/1.0.0/).
 
           Version: ${VERSION}
           Date: ${DATE}
 
-          Commits since last release:
+          ${UNRELEASED_SECTION}Commits since last release:
           ${COMMITS}
 
           Requirements:
           - Start the entry with the exact header "## [${VERSION}] - ${DATE}".
           - Group bullets under "### Added", "### Changed", "### Fixed", "### Removed", "### Deprecated", "### Security" as appropriate. Omit any empty section.
-          - Write concise, user-facing bullets. Collapse related commits. Drop purely internal noise (formatting, CI tweaks, version bumps) unless significant.
+          - Write concise, user-facing bullets. Collapse related commits and any curated [Unreleased] notes into a single unified entry. Drop purely internal noise (formatting, CI tweaks, version bumps) unless significant.
           - Use backticks around code identifiers (classes, methods, files).
           - Output ONLY the markdown for the new entry. No preamble, no trailing commentary, no code fences.
           EOF
@@ -263,10 +283,13 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import re
           from pathlib import Path
           entry = Path('/tmp/entry.md').read_text().strip() + "\n"
           path = Path('CHANGELOG.md')
           content = path.read_text()
+          # Strip the [Unreleased] section if present so it isn't left dangling.
+          content = re.sub(r'\n## \[Unreleased\][^\n]*\n.*?(?=\n## \[|\Z)', '', content, flags=re.DOTALL)
           marker = "\n## ["
           idx = content.find(marker)
           if idx == -1:
