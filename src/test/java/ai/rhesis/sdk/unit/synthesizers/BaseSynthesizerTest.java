@@ -125,6 +125,48 @@ class BaseSynthesizerTest {
   }
 
   @org.junit.jupiter.api.Test
+  void customTestSetNameIsUsedWhenProvided() {
+    List<Map<String, Object>> flatTests = List.of(flatTest("q", "a", "en", "R", "C", "T"));
+
+    GenerationConfig config =
+        GenerationConfig.builder()
+            .generationPrompt("test")
+            .testSetName("My Custom Tests")
+            .testSetDescription("Custom description")
+            .build();
+    Synthesizer synth = new Synthesizer(config, stubModel(flatTests), 20);
+
+    TestSet testSet = synth.generate(1);
+    assertThat(testSet.name()).isEqualTo("My Custom Tests");
+    assertThat(testSet.description()).isEqualTo("Custom description");
+  }
+
+  @org.junit.jupiter.api.Test
+  void defaultTestSetNameIsUsedWhenNotProvided() {
+    List<Map<String, Object>> flatTests = List.of(flatTest("q", "a", "en", "R", "C", "T"));
+
+    GenerationConfig config = GenerationConfig.builder().generationPrompt("test").build();
+    Synthesizer synth = new Synthesizer(config, stubModel(flatTests), 20);
+
+    TestSet testSet = synth.generate(1);
+    assertThat(testSet.name()).isEqualTo("Synthesized TestSet");
+    assertThat(testSet.description()).startsWith("Generated with Synthesizer");
+  }
+
+  @org.junit.jupiter.api.Test
+  void multiTurnSynthesizerAppendsMultiTurnSuffix() {
+    List<Map<String, Object>> flatTests =
+        List.of(flatMultiTurnTest("goal", "", "", "", 2, 5, "R", "C", "T"));
+
+    GenerationConfig config =
+        GenerationConfig.builder().generationPrompt("test").testSetName("Safety Suite").build();
+    MultiTurnSynthesizer synth = new MultiTurnSynthesizer(config, stubModel(flatTests), 20);
+
+    TestSet testSet = synth.generate(1);
+    assertThat(testSet.name()).isEqualTo("Safety Suite (Multi-Turn)");
+  }
+
+  @org.junit.jupiter.api.Test
   void generatedPromptHasExpectedResponseAndLanguageCodeAsTopLevelFields() throws Exception {
     List<Map<String, Object>> flatTests =
         List.of(

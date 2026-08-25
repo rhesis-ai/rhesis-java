@@ -1,12 +1,9 @@
 package ai.rhesis.sdk.examples;
 
 import ai.rhesis.sdk.RhesisClient;
-import ai.rhesis.sdk.entities.TestRun;
-import ai.rhesis.sdk.entities.stats.MetricStats;
-import ai.rhesis.sdk.entities.stats.TestResultStats;
-import ai.rhesis.sdk.entities.stats.TestRunSummary;
-import ai.rhesis.sdk.entities.stats.TimelineData;
-import ai.rhesis.sdk.enums.TestResultStatsMode;
+import ai.rhesis.sdk.entities.InsightsIdsResponse;
+import ai.rhesis.sdk.entities.InsightsQuery;
+import ai.rhesis.sdk.entities.InsightsResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -14,111 +11,72 @@ public class TestResultStatsExample {
   public static void main(String[] args) {
     RhesisClient client = RhesisClient.builder().apiKey(System.getenv("RHESIS_API_KEY")).build();
 
-    // --- Full test result stats ---
-    System.out.println("=== Test Result Stats (all) ===");
-    TestResultStats stats = client.testResults().stats();
-
-    if (stats.overallPassRates() != null) {
-      System.out.println("Total results: " + stats.overallPassRates().total());
-      System.out.println("Passed:        " + stats.overallPassRates().passed());
-      System.out.println("Failed:        " + stats.overallPassRates().failed());
-      System.out.println("Pass rate:     " + stats.overallPassRates().passRate() + "%");
+    // --- Overall test result counts ---
+    System.out.println("=== Test Result Count ===");
+    InsightsResponse overall =
+        client
+            .insights()
+            .get("test_result", List.of(), List.of("count", "pass_rate", "passed", "failed"), null);
+    for (Map<String, Object> row : overall.rows()) {
+      System.out.println("  " + row);
     }
 
-    // --- Metric pass rates ---
-    if (stats.metricPassRates() != null) {
-      System.out.println("\n=== Metric Pass Rates ===");
-      for (Map.Entry<String, MetricStats> entry : stats.metricPassRates().entrySet()) {
-        MetricStats m = entry.getValue();
-        System.out.printf(
-            "  %-20s total=%d  passed=%d  failed=%d  rate=%.1f%%%n",
-            entry.getKey(), m.total(), m.passed(), m.failed(), m.passRate());
-      }
+    // --- Pass rates by requirement ---
+    System.out.println("\n=== Pass Rates by Requirement ===");
+    InsightsResponse byRequirement =
+        client
+            .insights()
+            .get("test_result", List.of("requirement"), List.of("count", "pass_rate"), null);
+    for (Map<String, Object> row : byRequirement.rows()) {
+      System.out.printf(
+          "  %-25s count=%s  pass_rate=%s%n",
+          row.get("requirement"), row.get("count"), row.get("pass_rate"));
     }
 
-    // --- Requirement breakdown ---
-    System.out.println("\n=== Requirement Pass Rates ===");
-    TestResultStats requirementStats = client.testResults().stats(TestResultStatsMode.REQUIREMENT);
-    if (requirementStats.requirementPassRates() != null) {
-      for (Map.Entry<String, MetricStats> entry :
-          requirementStats.requirementPassRates().entrySet()) {
-        System.out.printf(
-            "  %-25s rate=%.1f%% (%d/%d)%n",
-            entry.getKey(),
-            entry.getValue().passRate(),
-            entry.getValue().passed(),
-            entry.getValue().total());
-      }
+    // --- Pass rates by category ---
+    System.out.println("\n=== Pass Rates by Category ===");
+    InsightsResponse byCategory =
+        client
+            .insights()
+            .get("test_result", List.of("category"), List.of("count", "pass_rate"), null);
+    for (Map<String, Object> row : byCategory.rows()) {
+      System.out.printf(
+          "  %-25s count=%s  pass_rate=%s%n",
+          row.get("category"), row.get("count"), row.get("pass_rate"));
     }
 
-    // --- Category breakdown ---
-    System.out.println("\n=== Category Pass Rates ===");
-    TestResultStats categoryStats = client.testResults().stats(TestResultStatsMode.CATEGORY);
-    if (categoryStats.categoryPassRates() != null) {
-      for (Map.Entry<String, MetricStats> entry : categoryStats.categoryPassRates().entrySet()) {
-        System.out.printf("  %-25s rate=%.1f%%%n", entry.getKey(), entry.getValue().passRate());
-      }
+    // --- Pass rates by topic ---
+    System.out.println("\n=== Pass Rates by Topic ===");
+    InsightsResponse byTopic =
+        client.insights().get("test_result", List.of("topic"), List.of("count", "pass_rate"), null);
+    for (Map<String, Object> row : byTopic.rows()) {
+      System.out.printf(
+          "  %-25s count=%s  pass_rate=%s%n",
+          row.get("topic"), row.get("count"), row.get("pass_rate"));
     }
 
-    // --- Topic breakdown ---
-    System.out.println("\n=== Topic Pass Rates ===");
-    TestResultStats topicStats = client.testResults().stats(TestResultStatsMode.TOPIC);
-    if (topicStats.topicPassRates() != null) {
-      for (Map.Entry<String, MetricStats> entry : topicStats.topicPassRates().entrySet()) {
-        System.out.printf("  %-25s rate=%.1f%%%n", entry.getKey(), entry.getValue().passRate());
-      }
+    // --- Results from the last 6 months ---
+    System.out.println("\n=== Test Results (last 6 months) ===");
+    InsightsQuery recentQuery =
+        InsightsQuery.builder("test_result")
+            .groupBy(List.of("requirement"))
+            .measures(List.of("count", "pass_rate"))
+            .months(6)
+            .build();
+    InsightsResponse recent = client.insights().get(recentQuery);
+    for (Map<String, Object> row : recent.rows()) {
+      System.out.printf(
+          "  %-25s count=%s  pass_rate=%s%n",
+          row.get("requirement"), row.get("count"), row.get("pass_rate"));
     }
 
-    // --- Timeline ---
-    if (stats.timeline() != null) {
-      System.out.println("\n=== Timeline ===");
-      for (TimelineData point : stats.timeline()) {
-        System.out.printf(
-            "  %s  overall: %d/%d (%.1f%%)%n",
-            point.date(),
-            point.overall().passed(),
-            point.overall().total(),
-            point.overall().passRate());
-      }
-    }
-
-    // --- Per-run summary ---
-    if (stats.testRunSummary() != null) {
-      System.out.println("\n=== Per-Run Summary ===");
-      for (TestRunSummary run : stats.testRunSummary()) {
-        System.out.printf(
-            "  [%s] %s — %d tests, rate=%.1f%%%n",
-            run.id(), run.name(), run.totalTests(), run.overall().passRate());
-      }
-    }
-
-    // --- Filtered by a specific test run ---
-    List<TestRun> runs = client.testRuns().list();
-    if (!runs.isEmpty()) {
-      System.out.println("\n=== Results for run: " + runs.get(0).name() + " ===");
-      TestResultStats runStats =
-          client
-              .testResults()
-              .stats(TestResultStatsMode.ALL, Map.of("test_run_ids", List.of(runs.get(0).id())));
-
-      if (runStats.overallPassRates() != null) {
-        System.out.println("Pass rate: " + runStats.overallPassRates().passRate() + "%");
-      }
-      if (runStats.metricPassRates() != null) {
-        System.out.println("Metrics evaluated: " + runStats.metricPassRates().size());
-      }
-    }
-
-    // --- Metadata ---
-    if (stats.metadata() != null) {
-      System.out.println("\n=== Metadata ===");
-      System.out.println("Period:          " + stats.metadata().period());
-      System.out.println("Total runs:      " + stats.metadata().totalTestRuns());
-      System.out.println("Total results:   " + stats.metadata().totalTestResults());
-      System.out.println("Metrics:         " + stats.metadata().availableMetrics());
-      System.out.println("Requirements:    " + stats.metadata().availableRequirements());
-      System.out.println("Categories:      " + stats.metadata().availableCategories());
-      System.out.println("Topics:          " + stats.metadata().availableTopics());
+    // --- Get IDs of failed test results ---
+    System.out.println("\n=== Failed Test Result IDs ===");
+    InsightsIdsResponse failedIds = client.insights().ids("test_result", "fail", null);
+    System.out.println("Entity: " + failedIds.entity());
+    System.out.println("Failed IDs: " + failedIds.ids().size());
+    for (String id : failedIds.ids().subList(0, Math.min(5, failedIds.ids().size()))) {
+      System.out.println("  " + id);
     }
   }
 }

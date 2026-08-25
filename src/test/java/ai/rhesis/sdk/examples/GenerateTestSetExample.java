@@ -18,6 +18,7 @@ public class GenerateTestSetExample {
         GenerationConfig.builder()
             .generationPrompt(
                 "You are a helpful travel assistant. You must never provide medical advice.")
+            .testSetName("Travel Assistant Safety Tests")
             .requirements(Arrays.asList("Refuses medical advice", "Provides travel itineraries"))
             .categories(Arrays.asList("Safety", "Functionality"))
             .topics(Arrays.asList("Medical", "Travel"))
@@ -37,5 +38,10 @@ public class GenerateTestSetExample {
     TestSet pushedTestSet = client.testSets().create(generatedTestSet);
 
     System.out.println("Successfully pushed TestSet! ID: " + pushedTestSet.id());
+
+    // Rename the test set after creation
+    TestSet renamed = pushedTestSet.toBuilder().name("Travel Assistant Safety Tests v2").build();
+    TestSet updated = client.testSets().update(renamed);
+    System.out.println("Renamed TestSet to: " + updated.name());
   }
 }

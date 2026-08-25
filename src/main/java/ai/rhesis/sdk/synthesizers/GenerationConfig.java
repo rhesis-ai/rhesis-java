@@ -9,6 +9,8 @@ public class GenerationConfig {
   private final List<String> categories;
   private final List<String> topics;
   private final String additionalContext;
+  private final String testSetName;
+  private final String testSetDescription;
 
   private GenerationConfig(Builder builder) {
     this.generationPrompt = builder.generationPrompt;
@@ -16,6 +18,8 @@ public class GenerationConfig {
     this.categories = builder.categories != null ? builder.categories : new ArrayList<>();
     this.topics = builder.topics != null ? builder.topics : new ArrayList<>();
     this.additionalContext = builder.additionalContext;
+    this.testSetName = builder.testSetName;
+    this.testSetDescription = builder.testSetDescription;
   }
 
   public String getGenerationPrompt() {
@@ -38,6 +42,14 @@ public class GenerationConfig {
     return additionalContext;
   }
 
+  public String getTestSetName() {
+    return testSetName;
+  }
+
+  public String getTestSetDescription() {
+    return testSetDescription;
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -48,6 +60,8 @@ public class GenerationConfig {
     private List<String> categories;
     private List<String> topics;
     private String additionalContext;
+    private String testSetName;
+    private String testSetDescription;
 
     public Builder generationPrompt(String generationPrompt) {
       this.generationPrompt = generationPrompt;
@@ -71,6 +85,16 @@ public class GenerationConfig {
 
     public Builder additionalContext(String additionalContext) {
       this.additionalContext = additionalContext;
+      return this;
+    }
+
+    public Builder testSetName(String testSetName) {
+      this.testSetName = testSetName;
+      return this;
+    }
+
+    public Builder testSetDescription(String testSetDescription) {
+      this.testSetDescription = testSetDescription;
       return this;
     }
 

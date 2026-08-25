@@ -51,7 +51,7 @@ The Rhesis Java SDK empowers developers to programmatically access curated test 
   - [Generating Custom Test Sets](#generating-custom-test-sets-%EF%B8%8F)
   - [Examples](#examples-)
     - [Test Execution](#test-execution)
-    - [Analytics & Stats](#analytics--stats)
+    - [Insights](#insights)
 - [About Rhesis AI](#-about-rhesis-ai)
 - [Community](#-community-)
 - [Hugging Face](#-hugging-face)
@@ -65,7 +65,7 @@ The Rhesis Java SDK provides programmatic access to the Rhesis testing platform:
 - **Access Test Sets**: Browse and load curated test sets across multiple domains and use cases
 - **Generate Test Scenarios**: Create custom test sets from prompts, requirements, or domain knowledge natively using local LLM models
 - **Execute Test Runs**: Trigger test set runs against your endpoints in parallel or sequential mode
-- **Analytics & Stats**: Typed stats for test runs and test results — pass rates by metric, requirement, category, topic, and timeline trends
+- **Insights**: Aggregation queries for test runs and results — pass rates by requirement, category, topic, with date range filtering
 - **Manage Metrics & Tests**: Add/remove metrics on test sets, associate/disassociate tests, rescore previous runs
 - **Seamless Integration**: Integrate testing into your Java CI/CD pipeline and development workflow
 - **Comprehensive Coverage**: Scale your testing from dozens to thousands of scenarios
@@ -226,8 +226,8 @@ Your API key will be in the format `rh-XXXXXXXXXXXXXXXXXXXX`. Keep this key secu
 ```java
 import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.entities.TestSet;
-import ai.rhesis.sdk.synthesizers.Synthesizer;
 import ai.rhesis.sdk.synthesizers.GenerationConfig;
+import ai.rhesis.sdk.synthesizers.Synthesizer;
 import java.util.List;
 
 public class Main {
@@ -238,19 +238,27 @@ public class Main {
         RhesisClient client = RhesisClient.builder()
                 .apiKey("rh-your-api-key") // Get from app.rhesis.ai settings
                 .build();
+        RhesisClient.setDefault(client);
 
         // Browse available test sets
         List<TestSet> testSets = client.testSets().list();
         for (TestSet testSet : testSets) {
-            System.out.println(testSet.getName());
+            System.out.println(testSet.name());
         }
 
-        // Generate custom test scenarios
-        Synthesizer synthesizer = new Synthesizer("Generate tests for a medical chatbot that must never provide diagnosis");
+        // Generate custom test scenarios with a name
+        GenerationConfig config = GenerationConfig.builder()
+                .generationPrompt("Generate tests for a medical chatbot that must never provide diagnosis")
+                .testSetName("Medical Chatbot Safety Tests")
+                .requirements(List.of("Refuses diagnosis", "Recommends professional consultation"))
+                .build();
 
-        TestSet generatedTestSet = synthesizer.generate(10);
+        TestSet generatedTestSet = new Synthesizer(config).generate(10);
         System.out.println("Generated Tests:");
         generatedTestSet.tests().forEach(test -> System.out.println(test.prompt()));
+
+        // Push to the platform
+        client.testSets().create(generatedTestSet);
     }
 }
 ```
@@ -282,9 +290,9 @@ Looking for more detailed examples? Check out the full [Examples README](src/tes
 **Test Set Management**
 - [Test Set Metrics](src/test/java/ai/rhesis/sdk/examples/TestSetMetricsExample.java) — List, add, and remove metrics; associate and disassociate tests
 
-**Analytics & Stats**
-- [Test Run Stats](src/test/java/ai/rhesis/sdk/examples/TestRunStatsExample.java) — Overall summary, status distribution, most-run test sets, timeline, filtered queries
-- [Test Result Stats](src/test/java/ai/rhesis/sdk/examples/TestResultStatsExample.java) — Pass rates by metric, requirement, category, and topic; per-run summaries and timeline trends
+**Insights**
+- [Test Run Insights](src/test/java/ai/rhesis/sdk/examples/TestRunStatsExample.java) — Run counts by status, date range filtering with months and start/end dates
+- [Test Result Insights](src/test/java/ai/rhesis/sdk/examples/TestResultStatsExample.java) — Pass rates by requirement, category, and topic; date range queries and failed ID retrieval
 
 You can run any example from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment (it will be automatically picked up from a `.env` file at the root of the project if one exists):
 

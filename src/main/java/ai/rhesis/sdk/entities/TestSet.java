@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 import lombok.Builder;
 
-@Builder
+@Builder(toBuilder = true)
 public record TestSet(
     @JsonProperty("id") String id,
     @JsonProperty("name") String name,

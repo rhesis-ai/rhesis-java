@@ -43,12 +43,15 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
       generatedTests.addAll(generateBatch(currentBatchSize));
     }
 
-    return new TestSet(
-        null,
-        "Synthesized TestSet (Multi-Turn)",
-        "Generated with MultiTurnSynthesizer based on prompt: " + config.getGenerationPrompt(),
-        TestType.MULTI_TURN,
-        generatedTests);
+    String baseName =
+        config.getTestSetName() != null ? config.getTestSetName() : "Synthesized TestSet";
+    String name = baseName + " (Multi-Turn)";
+    String description =
+        config.getTestSetDescription() != null
+            ? config.getTestSetDescription()
+            : "Generated with MultiTurnSynthesizer based on prompt: "
+                + config.getGenerationPrompt();
+    return new TestSet(null, name, description, TestType.MULTI_TURN, generatedTests);
   }
 
   private List<Test> generateBatch(int currentBatchSize) {
