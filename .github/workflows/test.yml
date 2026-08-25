@@ -7,21 +7,132 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
-    name: Run Tests
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Java 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         cache: 'maven'
-        
-    - name: Run Maven Tests
+
+    - name: Run Unit Tests
+      run: make test-unit
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: rhesis-db
+          POSTGRES_USER: rhesis-user
+          POSTGRES_PASSWORD: rhesis-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rhesis-user -d rhesis-db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Java 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Start Rhesis backend
       env:
-        RHESIS_API_KEY: ${{ secrets.RHESIS_API_KEY }}
-        RHESIS_BASE_URL: ${{ secrets.RHESIS_BASE_URL }}
-      run: make test
+        DB_HOST: localhost
+        DB_PORT: "5432"
+        DB_NAME: rhesis-db
+        APP_DB_USER: rhesis-user
+        APP_DB_PASS: rhesis-password
+        BROKER_URL: redis://localhost:6379/0
+        CELERY_RESULT_BACKEND: redis://localhost:6379/1
+        JWT_SECRET_KEY: ci-test-jwt-secret
+        SESSION_SECRET_KEY: ci-test-session-secret
+        DB_ENCRYPTION_KEY: ci-test-encryption-key-32chars!!
+        QUICK_START: "true"
+        BACKEND_ENV: local
+        ENABLE_RHESIS_KEY: "true"
+        API_BASE_URL: http://localhost:8080
+      run: |
+        docker run -d --name rhesis-backend \
+          --network host \
+          -e DB_HOST=$DB_HOST \
+          -e DB_PORT=$DB_PORT \
+          -e DB_NAME=$DB_NAME \
+          -e APP_DB_USER=$APP_DB_USER \
+          -e APP_DB_PASS=$APP_DB_PASS \
+          -e BROKER_URL=$BROKER_URL \
+          -e CELERY_RESULT_BACKEND=$CELERY_RESULT_BACKEND \
+          -e JWT_SECRET_KEY=$JWT_SECRET_KEY \
+          -e SESSION_SECRET_KEY=$SESSION_SECRET_KEY \
+          -e DB_ENCRYPTION_KEY=$DB_ENCRYPTION_KEY \
+          -e QUICK_START=$QUICK_START \
+          -e BACKEND_ENV=$BACKEND_ENV \
+          -e ENABLE_RHESIS_KEY=$ENABLE_RHESIS_KEY \
+          -e API_BASE_URL=$API_BASE_URL \
+          ghcr.io/rhesis-ai/backend:latest
+
+    - name: Wait for backend to be healthy
+      run: |
+        echo "Waiting for backend to start..."
+        for i in $(seq 1 60); do
+          if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
+            echo "Backend is healthy!"
+            exit 0
+          fi
+          echo "Attempt $i/60 - waiting..."
+          sleep 5
+        done
+        echo "Backend failed to start"
+        docker logs rhesis-backend
+        exit 1
+
+    - name: Run Integration Tests
+      env:
+        RHESIS_API_KEY: rh-local-token
+        RHESIS_BASE_URL: http://localhost:8080
+      run: make test-integration
+
+    - name: Show backend logs on failure
+      if: failure()
+      run: docker logs rhesis-backend
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Java 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Run Lint
+      run: make lint
