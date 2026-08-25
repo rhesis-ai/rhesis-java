@@ -12,6 +12,7 @@ public class SchemaBuilder {
     items.put("type", "object");
     items.put("properties", properties);
     items.put("required", requiredFields);
+    items.put("additionalProperties", false);
 
     Map<String, Object> testsProp = new HashMap<>();
     testsProp.put("type", "array");
@@ -22,9 +23,12 @@ public class SchemaBuilder {
 
     Map<String, Object> jsonSchema = new HashMap<>();
     jsonSchema.put("name", "FlatTests");
-    jsonSchema.put(
-        "schema",
-        Map.of("type", "object", "properties", schemaProps, "required", List.of("tests")));
+    Map<String, Object> schema = new HashMap<>();
+    schema.put("type", "object");
+    schema.put("properties", schemaProps);
+    schema.put("required", List.of("tests"));
+    schema.put("additionalProperties", false);
+    jsonSchema.put("schema", schema);
     jsonSchema.put("strict", true);
 
     Map<String, Object> rootSchema = new HashMap<>();
