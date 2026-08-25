@@ -39,7 +39,7 @@ public class SchemaBuilder {
     properties.put("prompt_content", Map.of("type", "string"));
     properties.put("prompt_expected_response", Map.of("type", "string"));
     properties.put("prompt_language_code", Map.of("type", "string"));
-    properties.put("behavior", Map.of("type", "string"));
+    properties.put("requirement", Map.of("type", "string"));
     properties.put("category", Map.of("type", "string"));
     properties.put("topic", Map.of("type", "string"));
 
@@ -49,7 +49,7 @@ public class SchemaBuilder {
             "prompt_content",
             "prompt_expected_response",
             "prompt_language_code",
-            "behavior",
+            "requirement",
             "category",
             "topic"));
   }
@@ -62,7 +62,7 @@ public class SchemaBuilder {
     properties.put("test_configuration_scenario", Map.of("type", "string"));
     properties.put("test_configuration_min_turns", Map.of("type", "integer"));
     properties.put("test_configuration_max_turns", Map.of("type", "integer"));
-    properties.put("behavior", Map.of("type", "string"));
+    properties.put("requirement", Map.of("type", "string"));
     properties.put("category", Map.of("type", "string"));
     properties.put("topic", Map.of("type", "string"));
 
@@ -75,7 +75,7 @@ public class SchemaBuilder {
             "test_configuration_scenario",
             "test_configuration_min_turns",
             "test_configuration_max_turns",
-            "behavior",
+            "requirement",
             "category",
             "topic"));
   }

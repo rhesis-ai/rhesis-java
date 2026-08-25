@@ -2,6 +2,7 @@ package ai.rhesis.sdk;
 
 import ai.rhesis.sdk.clients.EndpointClient;
 import ai.rhesis.sdk.clients.FileClient;
+import ai.rhesis.sdk.clients.InsightsClient;
 import ai.rhesis.sdk.clients.ProjectClient;
 import ai.rhesis.sdk.clients.TestClient;
 import ai.rhesis.sdk.clients.TestResultClient;
@@ -24,6 +25,7 @@ public class RhesisClient {
   private final TestRunClient testRuns;
   private final TestResultClient testResults;
   private final FileClient files;
+  private final InsightsClient insights;
 
   RhesisClient(String baseUrl, String apiKey) {
     this.httpClient = new InternalHttpClient(baseUrl, apiKey);
@@ -36,6 +38,7 @@ public class RhesisClient {
     this.testRuns = new TestRunClient(this.httpClient);
     this.testResults = new TestResultClient(this.httpClient);
     this.files = new FileClient(this.httpClient);
+    this.insights = new InsightsClient(this.httpClient);
   }
 
   public static RhesisClientBuilder builder() {
@@ -95,5 +98,9 @@ public class RhesisClient {
 
   public FileClient files() {
     return files;
+  }
+
+  public InsightsClient insights() {
+    return insights;
   }
 }

@@ -93,7 +93,7 @@ Replace the class name with any example listed below.
 | Example | Description |
 |---------|-------------|
 | `TestRunStatsExample` | Test run analytics: overall summary, status distribution, most-run test sets, timeline, filtering by mode/months/run IDs. |
-| `TestResultStatsExample` | Test result analytics: pass rates by metric, behavior, category, and topic. Timeline trends, per-run summaries, and filtered queries. |
+| `TestResultStatsExample` | Test result analytics: pass rates by metric, requirement, category, and topic. Timeline trends, per-run summaries, and filtered queries. |
 
 ## Quick Reference
 
@@ -111,9 +111,9 @@ Map<String, Object> result = client.testSets()
 TestRunStats stats = client.testRuns().stats();
 System.out.println("Pass rate: " + stats.overallSummary().passRate() + "%");
 
-// Get test result stats by behavior
-TestResultStats behaviorStats = client.testResults()
-    .stats(TestResultStatsMode.BEHAVIOR);
+// Get test result stats by requirement
+TestResultStats requirementStats = client.testResults()
+    .stats(TestResultStatsMode.REQUIREMENT);
 
 // Get last completed run
 TestRun lastRun = client.testSets()

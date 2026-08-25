@@ -12,10 +12,10 @@ import lombok.Builder;
 public record Test(
     @JsonProperty("id") String id,
     @JsonProperty("test_configuration") TestConfiguration testConfiguration,
-    @JsonProperty("behavior")
+    @JsonProperty("requirement")
         @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
             using = NameStringDeserializer.class)
-        String behavior,
+        String requirement,
     @JsonProperty("category")
         @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
             using = NameStringDeserializer.class)

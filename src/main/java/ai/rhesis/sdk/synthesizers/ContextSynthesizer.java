@@ -57,7 +57,7 @@ public class ContextSynthesizer extends BaseSynthesizer {
       context.put("generation_prompt", config.getGenerationPrompt());
       // Map additionalContext to context to match the jinja template
       context.put("context", config.getAdditionalContext());
-      context.put("behaviors", config.getBehaviors());
+      context.put("requirements", config.getRequirements());
       context.put("categories", config.getCategories());
       context.put("topics", config.getTopics());
       context.put("num_tests", currentBatchSize);

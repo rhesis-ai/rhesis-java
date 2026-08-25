@@ -61,7 +61,7 @@ class TestSetRoundTripIntegrationTest extends BaseIntegrationTest {
 
     Test test =
         Test.builder()
-            .behavior("Reliability")
+            .requirement("Reliability")
             .category("Compliance")
             .topic("Security")
             .testType(TestType.MULTI_TURN)
@@ -112,7 +112,7 @@ class TestSetRoundTripIntegrationTest extends BaseIntegrationTest {
 
     Test test =
         Test.builder()
-            .behavior("Reliability")
+            .requirement("Reliability")
             .category("Compliance")
             .topic("Security")
             .testType(TestType.MULTI_TURN)

@@ -6,14 +6,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.clients.*;
 import ai.rhesis.sdk.entities.File;
+import ai.rhesis.sdk.entities.InsightsIdsResponse;
+import ai.rhesis.sdk.entities.InsightsQuery;
+import ai.rhesis.sdk.entities.InsightsResponse;
 import ai.rhesis.sdk.entities.TestResult;
 import ai.rhesis.sdk.entities.TestRun;
 import ai.rhesis.sdk.entities.TestSet;
-import ai.rhesis.sdk.entities.stats.TestResultStats;
-import ai.rhesis.sdk.entities.stats.TestRunStats;
 import ai.rhesis.sdk.enums.ExecutionMode;
-import ai.rhesis.sdk.enums.TestResultStatsMode;
-import ai.rhesis.sdk.enums.TestRunStatsMode;
 import ai.rhesis.sdk.enums.TestType;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -29,6 +28,7 @@ class ClientWiremockTest {
   private static TestSetClient testSetClient;
   private static TestRunClient testRunClient;
   private static TestResultClient testResultClient;
+  private static InsightsClient insightsClient;
   private static FileClient fileClient;
 
   @BeforeAll
@@ -43,6 +43,7 @@ class ClientWiremockTest {
     testSetClient = rhesisClient.testSets();
     testRunClient = rhesisClient.testRuns();
     testResultClient = rhesisClient.testResults();
+    insightsClient = rhesisClient.insights();
     fileClient = rhesisClient.files();
   }
 
@@ -61,12 +62,12 @@ class ClientWiremockTest {
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"id\":\"t-123\",\"test_type\":\"Single-Turn\",\"behavior\":\"b1\"}")));
+                        "{\"id\":\"t-123\",\"test_type\":\"Single-Turn\",\"requirement\":\"b1\"}")));
 
     ai.rhesis.sdk.entities.Test response = testClient.get("t-123");
     assertThat(response.id()).isEqualTo("t-123");
     assertThat(response.testType()).isEqualTo(TestType.SINGLE_TURN);
-    assertThat(response.behavior()).isEqualTo("b1");
+    assertThat(response.requirement()).isEqualTo("b1");
   }
 
   @Test
@@ -270,7 +271,7 @@ class ClientWiremockTest {
 
       ai.rhesis.sdk.entities.Test testToCreate =
           ai.rhesis.sdk.entities.Test.builder()
-              .behavior("Behavior")
+              .requirement("Requirement")
               .category("Category")
               .topic("Topic")
               .testType(TestType.SINGLE_TURN)
@@ -389,56 +390,59 @@ class ClientWiremockTest {
   }
 
   @Test
-  void testTestRunStats() {
+  void testInsightsGet() {
     stubFor(
-        get(urlPathEqualTo("/test_runs/stats"))
-            .withQueryParam("mode", equalTo("all"))
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_run"))
+            .withQueryParam("measures", equalTo("count"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"overall_summary\":{\"total_runs\":10,\"unique_test_sets\":3,"
-                            + "\"unique_executors\":2,\"most_common_status\":\"Completed\","
-                            + "\"pass_rate\":0.85},"
-                            + "\"status_distribution\":[{\"status\":\"Completed\",\"count\":8,\"percentage\":80.0}],"
-                            + "\"metadata\":{\"mode\":\"all\",\"total_test_runs\":10}}")));
+                        "{\"entity\":\"test_run\",\"dimensions\":[],"
+                            + "\"measures\":[\"count\"],"
+                            + "\"rows\":[{\"count\":10}]}")));
 
-    TestRunStats response = testRunClient.stats();
-    assertThat(response.overallSummary()).isNotNull();
-    assertThat(response.overallSummary().totalRuns()).isEqualTo(10);
-    assertThat(response.overallSummary().passRate()).isEqualTo(0.85);
-    assertThat(response.statusDistribution()).hasSize(1);
-    assertThat(response.statusDistribution().get(0).status()).isEqualTo("Completed");
-    assertThat(response.metadata().totalTestRuns()).isEqualTo(10);
+    InsightsResponse response = insightsClient.get("test_run", List.of(), List.of("count"), null);
+    assertThat(response.entity()).isEqualTo("test_run");
+    assertThat(response.measures()).containsExactly("count");
+    assertThat(response.rows()).hasSize(1);
+    assertThat(response.rows().get(0)).containsEntry("count", 10);
   }
 
   @Test
-  void testTestRunStatsWithMode() {
+  void testInsightsGetWithGroupBy() {
     stubFor(
-        get(urlPathEqualTo("/test_runs/stats"))
-            .withQueryParam("mode", equalTo("summary"))
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_result"))
+            .withQueryParam("group_by", equalTo("requirement"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"overall_summary\":{\"total_runs\":5,\"unique_test_sets\":1,"
-                            + "\"unique_executors\":1,\"most_common_status\":\"Completed\","
-                            + "\"pass_rate\":0.9}}")));
+                        "{\"entity\":\"test_result\","
+                            + "\"dimensions\":[\"requirement\"],"
+                            + "\"measures\":[\"count\",\"pass_rate\"],"
+                            + "\"rows\":[{\"requirement\":\"Compliance\",\"count\":30,\"pass_rate\":0.93}]}")));
 
-    TestRunStats response = testRunClient.stats(TestRunStatsMode.SUMMARY);
-    assertThat(response.overallSummary()).isNotNull();
-    assertThat(response.overallSummary().totalRuns()).isEqualTo(5);
+    InsightsResponse response =
+        insightsClient.get(
+            "test_result", List.of("requirement"), List.of("count", "pass_rate"), null);
+    assertThat(response.entity()).isEqualTo("test_result");
+    assertThat(response.dimensions()).containsExactly("requirement");
+    assertThat(response.rows()).hasSize(1);
+    assertThat(response.rows().get(0)).containsEntry("requirement", "Compliance");
   }
 
   @Test
-  void testTestRunStatsWithRunIds() {
+  void testInsightsGetWithFilters() {
     stubFor(
-        get(urlPathEqualTo("/test_runs/stats"))
-            .withQueryParam("mode", equalTo("all"))
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_result"))
             .withQueryParam("test_run_ids", equalTo("tr-1"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
@@ -446,79 +450,137 @@ class ClientWiremockTest {
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"overall_summary\":{\"total_runs\":1,\"unique_test_sets\":1,"
-                            + "\"unique_executors\":1,\"most_common_status\":\"Completed\","
-                            + "\"pass_rate\":1.0}}")));
+                        "{\"entity\":\"test_result\","
+                            + "\"dimensions\":[],"
+                            + "\"measures\":[\"count\"],"
+                            + "\"rows\":[{\"count\":20}]}")));
 
-    TestRunStats response = testRunClient.stats(List.of("tr-1"));
-    assertThat(response.overallSummary()).isNotNull();
-    assertThat(response.overallSummary().totalRuns()).isEqualTo(1);
+    InsightsResponse response =
+        insightsClient.get(
+            "test_result", List.of(), List.of("count"), Map.of("test_run_ids", List.of("tr-1")));
+    assertThat(response.rows()).hasSize(1);
+    assertThat(response.rows().get(0)).containsEntry("count", 20);
   }
 
   @Test
-  void testTestResultStats() {
+  void testInsightsIds() {
     stubFor(
-        get(urlPathEqualTo("/test_results/stats"))
-            .withQueryParam("mode", equalTo("all"))
+        get(urlPathEqualTo("/insights/ids"))
+            .withQueryParam("entity", equalTo("test_result"))
+            .withQueryParam("outcome", equalTo("fail"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"entity\":\"test_result\"," + "\"ids\":[\"id-1\",\"id-2\"]}")));
+
+    InsightsIdsResponse response = insightsClient.ids("test_result", "fail", null);
+    assertThat(response.entity()).isEqualTo("test_result");
+    assertThat(response.ids()).containsExactly("id-1", "id-2");
+  }
+
+  @Test
+  void testInsightsGetDefaultMeasures() {
+    stubFor(
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_run"))
+            .withQueryParam("measures", equalTo("count"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"overall_pass_rates\":{\"total\":100,\"passed\":85,"
-                            + "\"failed\":15,\"pass_rate\":0.85},"
-                            + "\"metric_pass_rates\":{\"Accuracy\":{\"total\":50,\"passed\":45,"
-                            + "\"failed\":5,\"pass_rate\":0.9}},"
-                            + "\"metadata\":{\"mode\":\"all\",\"total_test_results\":100}}")));
+                        "{\"entity\":\"test_run\","
+                            + "\"dimensions\":[],"
+                            + "\"measures\":[\"count\"],"
+                            + "\"rows\":[]}")));
 
-    TestResultStats response = testResultClient.stats();
-    assertThat(response.overallPassRates()).isNotNull();
-    assertThat(response.overallPassRates().total()).isEqualTo(100);
-    assertThat(response.overallPassRates().passRate()).isEqualTo(0.85);
-    assertThat(response.metricPassRates()).containsKey("Accuracy");
-    assertThat(response.metricPassRates().get("Accuracy").passRate()).isEqualTo(0.9);
-    assertThat(response.metadata().totalTestResults()).isEqualTo(100);
+    InsightsResponse response = insightsClient.get("test_run", List.of());
+    assertThat(response.entity()).isEqualTo("test_run");
+    assertThat(response.rows()).isEmpty();
   }
 
   @Test
-  void testTestResultStatsWithMode() {
+  void testInsightsQueryWithDateRange() {
     stubFor(
-        get(urlPathEqualTo("/test_results/stats"))
-            .withQueryParam("mode", equalTo("behavior"))
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_result"))
+            .withQueryParam("measures", equalTo("count"))
+            .withQueryParam("months", equalTo("6"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"behavior_pass_rates\":{\"Compliance\":{\"total\":30,\"passed\":28,"
-                            + "\"failed\":2,\"pass_rate\":0.93}}}")));
+                        "{\"entity\":\"test_result\","
+                            + "\"dimensions\":[],"
+                            + "\"measures\":[\"count\"],"
+                            + "\"rows\":[{\"count\":42}]}")));
 
-    TestResultStats response = testResultClient.stats(TestResultStatsMode.BEHAVIOR);
-    assertThat(response.behaviorPassRates()).containsKey("Compliance");
-    assertThat(response.behaviorPassRates().get("Compliance").total()).isEqualTo(30);
+    InsightsQuery query =
+        InsightsQuery.builder("test_result").measures(List.of("count")).months(6).build();
+    InsightsResponse response = insightsClient.get(query);
+    assertThat(response.rows()).hasSize(1);
+    assertThat(response.rows().get(0)).containsEntry("count", 42);
   }
 
   @Test
-  void testTestResultStatsWithFilters() {
+  void testInsightsQueryWithStartEndDate() {
     stubFor(
-        get(urlPathEqualTo("/test_results/stats"))
-            .withQueryParam("mode", equalTo("all"))
-            .withQueryParam("test_run_ids", equalTo("tr-1"))
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_run"))
+            .withQueryParam("measures", equalTo("count"))
+            .withQueryParam("start_date", equalTo("2026-01-01"))
+            .withQueryParam("end_date", equalTo("2026-06-30"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"overall_pass_rates\":{\"total\":20,\"passed\":18,"
-                            + "\"failed\":2,\"pass_rate\":0.9}}")));
+                        "{\"entity\":\"test_run\","
+                            + "\"dimensions\":[],"
+                            + "\"measures\":[\"count\"],"
+                            + "\"rows\":[{\"count\":7}]}")));
 
-    Map<String, Object> params = Map.of("test_run_ids", List.of("tr-1"));
-    TestResultStats response = testResultClient.stats(TestResultStatsMode.ALL, params);
-    assertThat(response.overallPassRates()).isNotNull();
-    assertThat(response.overallPassRates().total()).isEqualTo(20);
+    InsightsQuery query =
+        InsightsQuery.builder("test_run")
+            .measures(List.of("count"))
+            .startDate("2026-01-01")
+            .endDate("2026-06-30")
+            .build();
+    InsightsResponse response = insightsClient.get(query);
+    assertThat(response.rows().get(0)).containsEntry("count", 7);
+  }
+
+  @Test
+  void testInsightsIdsWithQuery() {
+    stubFor(
+        get(urlPathEqualTo("/insights/ids"))
+            .withQueryParam("entity", equalTo("test_result"))
+            .withQueryParam("outcome", equalTo("fail"))
+            .withQueryParam("months", equalTo("3"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"entity\":\"test_result\"," + "\"ids\":[\"id-1\"]}")));
+
+    InsightsQuery query = InsightsQuery.builder("test_result").months(3).build();
+    InsightsIdsResponse response = insightsClient.ids(query, "fail");
+    assertThat(response.ids()).containsExactly("id-1");
+  }
+
+  @Test
+  void testStatsMethodsThrowUnsupported() {
+    assertThat(org.assertj.core.api.Assertions.catchThrowable(() -> testRunClient.stats()))
+        .isInstanceOf(UnsupportedOperationException.class);
+    assertThat(org.assertj.core.api.Assertions.catchThrowable(() -> testResultClient.stats()))
+        .isInstanceOf(UnsupportedOperationException.class);
   }
 
   @Test
@@ -579,7 +641,7 @@ class ClientWiremockTest {
             .build();
     ai.rhesis.sdk.entities.Test test =
         ai.rhesis.sdk.entities.Test.builder()
-            .behavior("Reliability")
+            .requirement("Reliability")
             .category("Compliance")
             .topic("Security")
             .testType(TestType.SINGLE_TURN)

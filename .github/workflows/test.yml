@@ -7,21 +7,64 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
-    name: Run Tests
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Java 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         cache: 'maven'
-        
-    - name: Run Maven Tests
+
+    - name: Run Unit Tests
+      run: make test-unit
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Java 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Start test infrastructure
+      run: make docker-up
+
+    - name: Run Integration Tests
       env:
-        RHESIS_API_KEY: ${{ secrets.RHESIS_API_KEY }}
-        RHESIS_BASE_URL: ${{ secrets.RHESIS_BASE_URL }}
-      run: make test
+        RHESIS_API_KEY: rh-local-token
+        RHESIS_BASE_URL: http://localhost:10003
+      run: make test-integration
+
+    - name: Show backend logs on failure
+      if: failure()
+      run: docker compose -f docker-compose.test.yml logs test-backend
+
+    - name: Stop test infrastructure
+      if: always()
+      run: make docker-clean
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Java 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Run Lint
+      run: make lint

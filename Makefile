@@ -1,4 +1,4 @@
-.PHONY: format lint check test test-unit test-integration build clean
+.PHONY: format lint check test test-unit test-integration build clean docker-up docker-down docker-clean
 
 # Format code using spotless (fixes the formatting errors you're seeing)
 format:
@@ -29,3 +29,17 @@ build:
 # Clean the target directory
 clean:
 	mvn clean
+
+# Docker management for integration tests
+docker-up:
+	docker compose -f docker-compose.test.yml up -d --wait
+	@echo "Seeding project scope on test token..."
+	@docker compose -f docker-compose.test.yml exec -T test-postgres \
+		psql -U rhesis-user -d rhesis-db -c \
+		"UPDATE token SET project_id = (SELECT id FROM project LIMIT 1);"
+
+docker-down:
+	docker compose -f docker-compose.test.yml down
+
+docker-clean:
+	docker compose -f docker-compose.test.yml down -v

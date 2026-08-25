@@ -6,7 +6,6 @@ import ai.rhesis.sdk.entities.stats.TestRunStats;
 import ai.rhesis.sdk.enums.TestRunStatsMode;
 import ai.rhesis.sdk.http.InternalHttpClient;
 import com.fasterxml.jackson.core.type.TypeReference;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,74 +33,42 @@ public class TestRunClient {
   }
 
   /**
-   * Get aggregated test run statistics with all sections.
-   *
-   * @return typed TestRunStats with all sections populated
+   * @deprecated Use {@link ai.rhesis.sdk.clients.InsightsClient} with entity "test_run" instead.
    */
+  @Deprecated
   public TestRunStats stats() {
-    return stats(TestRunStatsMode.ALL, null);
+    throw new UnsupportedOperationException(
+        "TestRunClient.stats() has been removed. "
+            + "Use client.insights().get(\"test_run\", ...) instead.");
   }
 
   /**
-   * Get aggregated test run statistics with the given mode.
-   *
-   * @param mode controls which sections the backend populates
-   * @return typed TestRunStats
+   * @deprecated Use {@link ai.rhesis.sdk.clients.InsightsClient} with entity "test_run" instead.
    */
+  @Deprecated
   public TestRunStats stats(TestRunStatsMode mode) {
-    return stats(mode, null);
+    throw new UnsupportedOperationException(
+        "TestRunClient.stats() has been removed. "
+            + "Use client.insights().get(\"test_run\", ...) instead.");
   }
 
   /**
-   * Get statistics scoped to specific test run IDs.
-   *
-   * @param testRunIds list of test run IDs to filter by
-   * @return typed TestRunStats
+   * @deprecated Use {@link ai.rhesis.sdk.clients.InsightsClient} with entity "test_run" instead.
    */
+  @Deprecated
   public TestRunStats stats(List<String> testRunIds) {
-    Map<String, Object> params = new LinkedHashMap<>();
-    if (testRunIds != null && !testRunIds.isEmpty()) {
-      params.put("test_run_ids", testRunIds);
-    }
-    return stats(TestRunStatsMode.ALL, params);
+    throw new UnsupportedOperationException(
+        "TestRunClient.stats() has been removed. "
+            + "Use client.insights().get(\"test_run\", ...) instead.");
   }
 
   /**
-   * Get aggregated test run statistics with full control over mode and filters.
-   *
-   * @param mode controls which sections the backend populates
-   * @param params optional filter parameters. Supported keys: "months", "top", "test_run_ids"
-   *     (List), "user_ids" (List), "endpoint_ids" (List), "test_set_ids" (List), "status_list"
-   *     (List), "start_date", "end_date"
-   * @return typed TestRunStats
+   * @deprecated Use {@link ai.rhesis.sdk.clients.InsightsClient} with entity "test_run" instead.
    */
+  @Deprecated
   public TestRunStats stats(TestRunStatsMode mode, Map<String, Object> params) {
-    StringBuilder path = new StringBuilder("/test_runs/stats?mode=");
-    path.append(encode(mode.getValue()));
-
-    if (params != null) {
-      for (Map.Entry<String, Object> entry : params.entrySet()) {
-        Object value = entry.getValue();
-        if (value instanceof List<?> listVal) {
-          for (Object item : listVal) {
-            path.append("&")
-                .append(encode(entry.getKey()))
-                .append("=")
-                .append(encode(item.toString()));
-          }
-        } else {
-          path.append("&")
-              .append(encode(entry.getKey()))
-              .append("=")
-              .append(encode(value.toString()));
-        }
-      }
-    }
-
-    return httpClient.get(path.toString(), TestRunStats.class);
-  }
-
-  private static String encode(String value) {
-    return java.net.URLEncoder.encode(value, java.nio.charset.StandardCharsets.UTF_8);
+    throw new UnsupportedOperationException(
+        "TestRunClient.stats() has been removed. "
+            + "Use client.insights().get(\"test_run\", ...) instead.");
   }
 }

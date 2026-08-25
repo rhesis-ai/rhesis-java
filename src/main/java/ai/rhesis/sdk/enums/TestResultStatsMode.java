@@ -7,7 +7,7 @@ public enum TestResultStatsMode {
   ALL("all"),
   SUMMARY("summary"),
   METRICS("metrics"),
-  BEHAVIOR("behavior"),
+  REQUIREMENT("requirement"),
   CATEGORY("category"),
   TOPIC("topic"),
   OVERALL("overall"),

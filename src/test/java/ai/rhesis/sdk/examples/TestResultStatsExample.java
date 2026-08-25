@@ -36,11 +36,12 @@ public class TestResultStatsExample {
       }
     }
 
-    // --- Behavior breakdown ---
-    System.out.println("\n=== Behavior Pass Rates ===");
-    TestResultStats behaviorStats = client.testResults().stats(TestResultStatsMode.BEHAVIOR);
-    if (behaviorStats.behaviorPassRates() != null) {
-      for (Map.Entry<String, MetricStats> entry : behaviorStats.behaviorPassRates().entrySet()) {
+    // --- Requirement breakdown ---
+    System.out.println("\n=== Requirement Pass Rates ===");
+    TestResultStats requirementStats = client.testResults().stats(TestResultStatsMode.REQUIREMENT);
+    if (requirementStats.requirementPassRates() != null) {
+      for (Map.Entry<String, MetricStats> entry :
+          requirementStats.requirementPassRates().entrySet()) {
         System.out.printf(
             "  %-25s rate=%.1f%% (%d/%d)%n",
             entry.getKey(),
@@ -115,7 +116,7 @@ public class TestResultStatsExample {
       System.out.println("Total runs:      " + stats.metadata().totalTestRuns());
       System.out.println("Total results:   " + stats.metadata().totalTestResults());
       System.out.println("Metrics:         " + stats.metadata().availableMetrics());
-      System.out.println("Behaviors:       " + stats.metadata().availableBehaviors());
+      System.out.println("Requirements:    " + stats.metadata().availableRequirements());
       System.out.println("Categories:      " + stats.metadata().availableCategories());
       System.out.println("Topics:          " + stats.metadata().availableTopics());
     }

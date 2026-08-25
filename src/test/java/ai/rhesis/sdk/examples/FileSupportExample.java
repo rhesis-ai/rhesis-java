@@ -20,7 +20,7 @@ public class FileSupportExample {
     // 2. Create a test
     Test test =
         Test.builder()
-            .behavior("File Test Behavior")
+            .requirement("File Test Requirement")
             .category("SDK")
             .topic("Files")
             .testType(TestType.SINGLE_TURN)
