@@ -13,7 +13,7 @@ x-database-config: &database-config
   DB_PORT: "5432"
   DB_DRIVER: postgresql
   DB_HOST: test-postgres
-  DB_ENCRYPTION_KEY: ci-test-encryption-key-32chars!!
+  DB_ENCRYPTION_KEY: Zb21wZbPsUpb-c2JKj8uMugk767pWXHFTsjocd0Orac=
 
 x-redis-config: &redis-config
   BROKER_URL: redis://:rhesis-redis-pass@test-redis:6379/0
