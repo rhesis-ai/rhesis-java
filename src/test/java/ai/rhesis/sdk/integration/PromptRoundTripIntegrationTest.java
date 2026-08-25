@@ -59,7 +59,7 @@ class PromptRoundTripIntegrationTest extends BaseIntegrationTest {
 
     Test test =
         Test.builder()
-            .behavior("Reliability")
+            .requirement("Reliability")
             .category("Compliance")
             .topic("Security")
             .testType(TestType.SINGLE_TURN)
@@ -123,7 +123,7 @@ class PromptRoundTripIntegrationTest extends BaseIntegrationTest {
 
     Test test =
         Test.builder()
-            .behavior("Reliability")
+            .requirement("Reliability")
             .category("Compliance")
             .topic("Security")
             .testType(TestType.SINGLE_TURN)
@@ -165,7 +165,7 @@ class PromptRoundTripIntegrationTest extends BaseIntegrationTest {
 
     Test test =
         Test.builder()
-            .behavior("Reliability")
+            .requirement("Reliability")
             .category("Functionality")
             .topic("Greeting")
             .testType(TestType.SINGLE_TURN)

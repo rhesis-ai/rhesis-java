@@ -21,7 +21,7 @@ class SynthesizerTest {
     GenerationConfig config =
         GenerationConfig.builder()
             .generationPrompt("My Prompt")
-            .behaviors(List.of("B1", "B2"))
+            .requirements(List.of("B1", "B2"))
             .categories(List.of("C1"))
             .build();
     Synthesizer synth = new Synthesizer(config, 20);
@@ -44,6 +44,6 @@ class SynthesizerTest {
     assertThat(output).contains("My Prompt");
     assertThat(output).contains("T1");
     assertThat(output).contains("T2");
-    assertThat(output).contains("Use the following default behaviors:");
+    assertThat(output).contains("Use the following default requirements:");
   }
 }

@@ -16,6 +16,6 @@ public record TestResultStatsMetadata(
     @JsonProperty("total_test_results") int totalTestResults,
     @JsonProperty("mode") String mode,
     @JsonProperty("available_metrics") List<String> availableMetrics,
-    @JsonProperty("available_behaviors") List<String> availableBehaviors,
+    @JsonProperty("available_requirements") List<String> availableRequirements,
     @JsonProperty("available_categories") List<String> availableCategories,
     @JsonProperty("available_topics") List<String> availableTopics) {}

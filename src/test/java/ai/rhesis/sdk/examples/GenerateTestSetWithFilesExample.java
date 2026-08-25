@@ -22,7 +22,8 @@ public class GenerateTestSetWithFilesExample {
         GenerationConfig.builder()
             .generationPrompt(
                 "You are testing an HR document processor. Generate tests involving reading policy documents.")
-            .behaviors(Arrays.asList("Accurately summarizes policies", "Identifies vacation days"))
+            .requirements(
+                Arrays.asList("Accurately summarizes policies", "Identifies vacation days"))
             .categories(Arrays.asList("Functionality", "Document Processing"))
             .topics(Arrays.asList("HR", "Time Off"))
             .build();

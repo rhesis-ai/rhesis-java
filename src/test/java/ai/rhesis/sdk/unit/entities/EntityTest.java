@@ -36,7 +36,7 @@ class EntityTest {
         ai.rhesis.sdk.entities.Test.builder()
             .id("test-1")
             .testConfiguration(config)
-            .behavior("Behavior1")
+            .requirement("Requirement1")
             .category("Category1")
             .topic("Topic1")
             .testType(TestType.SINGLE_TURN)
@@ -61,12 +61,12 @@ class EntityTest {
   }
 
   @Test
-  void testBehaviorSerialization() throws Exception {
-    Behavior behavior = new Behavior("beh-1", "Behav", "Desc", Map.of("key", "val"));
-    String json = mapper.writeValueAsString(behavior);
-    Behavior parsed = mapper.readValue(json, Behavior.class);
-    assertThat(parsed.id()).isEqualTo("beh-1");
-    assertThat(parsed.name()).isEqualTo("Behav");
+  void testRequirementSerialization() throws Exception {
+    Requirement requirement = new Requirement("req-1", "Req", "Desc", Map.of("key", "val"));
+    String json = mapper.writeValueAsString(requirement);
+    Requirement parsed = mapper.readValue(json, Requirement.class);
+    assertThat(parsed.id()).isEqualTo("req-1");
+    assertThat(parsed.name()).isEqualTo("Req");
     assertThat(parsed.description()).isEqualTo("Desc");
     assertThat(parsed.metadata()).containsEntry("key", "val");
   }
@@ -133,7 +133,7 @@ class EntityTest {
     // Regression guard: the backend returns test.metadata under the JSON key
     // "test_metadata" (renamed to avoid SQLAlchemy's reserved Model.metadata).
     // Test.metadata is annotated with @JsonAlias("test_metadata") so this round-trips.
-    String json = "{\"id\":\"t-1\",\"behavior\":\"b\",\"test_metadata\":{\"k\":\"v\",\"n\":42}}";
+    String json = "{\"id\":\"t-1\",\"requirement\":\"b\",\"test_metadata\":{\"k\":\"v\",\"n\":42}}";
     ai.rhesis.sdk.entities.Test parsed = mapper.readValue(json, ai.rhesis.sdk.entities.Test.class);
     assertThat(parsed.metadata())
         .as("test_metadata should be deserialized into metadata via @JsonAlias")
@@ -179,19 +179,19 @@ class EntityTest {
 
   @Test
   void testBaseEntityMethods() throws Exception {
-    Behavior behavior = new Behavior("beh-1", "Behav", "Desc", Map.of("key", "val"));
+    Requirement requirement = new Requirement("req-1", "Req", "Desc", Map.of("key", "val"));
 
     // Test toMap
-    Map<String, Object> map = behavior.toMap();
-    assertThat(map).containsEntry("id", "beh-1");
-    assertThat(map).containsEntry("name", "Behav");
+    Map<String, Object> map = requirement.toMap();
+    assertThat(map).containsEntry("id", "req-1");
+    assertThat(map).containsEntry("name", "Req");
 
     // Test toJson
-    String json = behavior.toJson();
-    assertThat(json).contains("\"id\":\"beh-1\"");
+    String json = requirement.toJson();
+    assertThat(json).contains("\"id\":\"req-1\"");
 
     // Test getEndpointPath
-    assertThat(behavior.getEndpointPath()).isEqualTo("/behaviors");
+    assertThat(requirement.getEndpointPath()).isEqualTo("/requirements");
   }
 
   @Test

@@ -130,8 +130,8 @@ class TestRunIntegrationTest extends BaseIntegrationTest {
 
   @Test
   @Order(11)
-  void testTestResultStatsBehaviorMode() {
-    TestResultStats stats = client.testResults().stats(TestResultStatsMode.BEHAVIOR);
+  void testTestResultStatsRequirementMode() {
+    TestResultStats stats = client.testResults().stats(TestResultStatsMode.REQUIREMENT);
     assertThat(stats).isNotNull();
   }
 

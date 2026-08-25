@@ -61,12 +61,12 @@ class ClientWiremockTest {
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"id\":\"t-123\",\"test_type\":\"Single-Turn\",\"behavior\":\"b1\"}")));
+                        "{\"id\":\"t-123\",\"test_type\":\"Single-Turn\",\"requirement\":\"b1\"}")));
 
     ai.rhesis.sdk.entities.Test response = testClient.get("t-123");
     assertThat(response.id()).isEqualTo("t-123");
     assertThat(response.testType()).isEqualTo(TestType.SINGLE_TURN);
-    assertThat(response.behavior()).isEqualTo("b1");
+    assertThat(response.requirement()).isEqualTo("b1");
   }
 
   @Test
@@ -270,7 +270,7 @@ class ClientWiremockTest {
 
       ai.rhesis.sdk.entities.Test testToCreate =
           ai.rhesis.sdk.entities.Test.builder()
-              .behavior("Behavior")
+              .requirement("Requirement")
               .category("Category")
               .topic("Topic")
               .testType(TestType.SINGLE_TURN)
@@ -485,19 +485,19 @@ class ClientWiremockTest {
   void testTestResultStatsWithMode() {
     stubFor(
         get(urlPathEqualTo("/test_results/stats"))
-            .withQueryParam("mode", equalTo("behavior"))
+            .withQueryParam("mode", equalTo("requirement"))
             .withHeader("Authorization", equalTo("Bearer test-key"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
-                        "{\"behavior_pass_rates\":{\"Compliance\":{\"total\":30,\"passed\":28,"
+                        "{\"requirement_pass_rates\":{\"Compliance\":{\"total\":30,\"passed\":28,"
                             + "\"failed\":2,\"pass_rate\":0.93}}}")));
 
-    TestResultStats response = testResultClient.stats(TestResultStatsMode.BEHAVIOR);
-    assertThat(response.behaviorPassRates()).containsKey("Compliance");
-    assertThat(response.behaviorPassRates().get("Compliance").total()).isEqualTo(30);
+    TestResultStats response = testResultClient.stats(TestResultStatsMode.REQUIREMENT);
+    assertThat(response.requirementPassRates()).containsKey("Compliance");
+    assertThat(response.requirementPassRates().get("Compliance").total()).isEqualTo(30);
   }
 
   @Test
@@ -579,7 +579,7 @@ class ClientWiremockTest {
             .build();
     ai.rhesis.sdk.entities.Test test =
         ai.rhesis.sdk.entities.Test.builder()
-            .behavior("Reliability")
+            .requirement("Reliability")
             .category("Compliance")
             .topic("Security")
             .testType(TestType.SINGLE_TURN)

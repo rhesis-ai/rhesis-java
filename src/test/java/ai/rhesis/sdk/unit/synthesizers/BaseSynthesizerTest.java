@@ -39,12 +39,17 @@ class BaseSynthesizerTest {
   }
 
   private static Map<String, Object> flatTest(
-      String prompt, String expected, String lang, String behavior, String category, String topic) {
+      String prompt,
+      String expected,
+      String lang,
+      String requirement,
+      String category,
+      String topic) {
     Map<String, Object> m = new HashMap<>();
     m.put("prompt_content", prompt);
     m.put("prompt_expected_response", expected);
     m.put("prompt_language_code", lang);
-    m.put("behavior", behavior);
+    m.put("requirement", requirement);
     m.put("category", category);
     m.put("topic", topic);
     return m;
@@ -57,7 +62,7 @@ class BaseSynthesizerTest {
       String scenario,
       Object minTurns,
       Object maxTurns,
-      String behavior,
+      String requirement,
       String category,
       String topic) {
     Map<String, Object> m = new HashMap<>();
@@ -67,7 +72,7 @@ class BaseSynthesizerTest {
     m.put("test_configuration_scenario", scenario);
     m.put("test_configuration_min_turns", minTurns);
     m.put("test_configuration_max_turns", maxTurns);
-    m.put("behavior", behavior);
+    m.put("requirement", requirement);
     m.put("category", category);
     m.put("topic", topic);
     return m;

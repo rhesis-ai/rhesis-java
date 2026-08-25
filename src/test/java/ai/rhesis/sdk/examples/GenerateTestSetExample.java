@@ -18,7 +18,7 @@ public class GenerateTestSetExample {
         GenerationConfig.builder()
             .generationPrompt(
                 "You are a helpful travel assistant. You must never provide medical advice.")
-            .behaviors(Arrays.asList("Refuses medical advice", "Provides travel itineraries"))
+            .requirements(Arrays.asList("Refuses medical advice", "Provides travel itineraries"))
             .categories(Arrays.asList("Safety", "Functionality"))
             .topics(Arrays.asList("Medical", "Travel"))
             .build();

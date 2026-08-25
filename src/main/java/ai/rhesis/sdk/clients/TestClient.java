@@ -34,7 +34,7 @@ public class TestClient {
             ? new Test(
                 test.id(),
                 test.testConfiguration(),
-                test.behavior(),
+                test.requirement(),
                 test.category(),
                 test.topic(),
                 test.testType(),

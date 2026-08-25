@@ -58,7 +58,7 @@ public class TestResultClient {
    *   <li>{@code test_run_id} — filter by a single test run ID
    *   <li>{@code test_run_ids} — filter by multiple test run IDs (List)
    *   <li>{@code test_set_ids} — filter by test set IDs (List)
-   *   <li>{@code behavior_ids} — filter by behavior IDs (List)
+   *   <li>{@code requirement_ids} — filter by requirement IDs (List)
    *   <li>{@code category_ids} — filter by category IDs (List)
    *   <li>{@code topic_ids} — filter by topic IDs (List)
    *   <li>{@code status_ids} — filter by test status IDs (List)

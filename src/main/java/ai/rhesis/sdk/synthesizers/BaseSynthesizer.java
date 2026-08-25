@@ -86,7 +86,7 @@ public abstract class BaseSynthesizer {
           new Test(
               null,
               null,
-              (String) flat.get("behavior"),
+              (String) flat.get("requirement"),
               (String) flat.get("category"),
               (String) flat.get("topic"),
               TestType.SINGLE_TURN,

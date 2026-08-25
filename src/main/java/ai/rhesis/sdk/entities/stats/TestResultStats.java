@@ -8,7 +8,7 @@ import lombok.Builder;
 @Builder
 public record TestResultStats(
     @JsonProperty("metric_pass_rates") Map<String, MetricStats> metricPassRates,
-    @JsonProperty("behavior_pass_rates") Map<String, MetricStats> behaviorPassRates,
+    @JsonProperty("requirement_pass_rates") Map<String, MetricStats> requirementPassRates,
     @JsonProperty("category_pass_rates") Map<String, MetricStats> categoryPassRates,
     @JsonProperty("topic_pass_rates") Map<String, MetricStats> topicPassRates,
     @JsonProperty("overall_pass_rates") OverallStats overallPassRates,

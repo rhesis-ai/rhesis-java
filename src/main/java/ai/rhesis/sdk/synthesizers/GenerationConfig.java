@@ -5,14 +5,14 @@ import java.util.List;
 
 public class GenerationConfig {
   private final String generationPrompt;
-  private final List<String> behaviors;
+  private final List<String> requirements;
   private final List<String> categories;
   private final List<String> topics;
   private final String additionalContext;
 
   private GenerationConfig(Builder builder) {
     this.generationPrompt = builder.generationPrompt;
-    this.behaviors = builder.behaviors != null ? builder.behaviors : new ArrayList<>();
+    this.requirements = builder.requirements != null ? builder.requirements : new ArrayList<>();
     this.categories = builder.categories != null ? builder.categories : new ArrayList<>();
     this.topics = builder.topics != null ? builder.topics : new ArrayList<>();
     this.additionalContext = builder.additionalContext;
@@ -22,8 +22,8 @@ public class GenerationConfig {
     return generationPrompt;
   }
 
-  public List<String> getBehaviors() {
-    return behaviors;
+  public List<String> getRequirements() {
+    return requirements;
   }
 
   public List<String> getCategories() {
@@ -44,7 +44,7 @@ public class GenerationConfig {
 
   public static class Builder {
     private String generationPrompt;
-    private List<String> behaviors;
+    private List<String> requirements;
     private List<String> categories;
     private List<String> topics;
     private String additionalContext;
@@ -54,8 +54,8 @@ public class GenerationConfig {
       return this;
     }
 
-    public Builder behaviors(List<String> behaviors) {
-      this.behaviors = behaviors;
+    public Builder requirements(List<String> requirements) {
+      this.requirements = requirements;
       return this;
     }
 

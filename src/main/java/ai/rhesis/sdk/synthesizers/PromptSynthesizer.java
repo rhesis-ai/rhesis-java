@@ -48,7 +48,7 @@ public class PromptSynthesizer extends BaseSynthesizer {
     for (int i = 0; i < numBatches; i++) {
       Map<String, Object> context = new HashMap<>();
       context.put("generation_prompt", config.getGenerationPrompt());
-      context.put("behaviors", config.getBehaviors());
+      context.put("requirements", config.getRequirements());
       context.put("categories", config.getCategories());
       context.put("topics", config.getTopics());
       context.put("num_tests", currentBatchSize);

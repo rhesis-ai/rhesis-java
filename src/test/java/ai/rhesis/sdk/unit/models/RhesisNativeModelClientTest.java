@@ -45,7 +45,7 @@ class RhesisNativeModelClientTest {
                       "test_configuration_scenario": "Scenario",
                       "test_configuration_min_turns": 1,
                       "test_configuration_max_turns": 3,
-                      "behavior": "Behavior 1",
+                      "requirement": "Requirement 1",
                       "category": "Category 1",
                       "topic": "Topic 1"
                     }

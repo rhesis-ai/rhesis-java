@@ -65,7 +65,7 @@ The Rhesis Java SDK provides programmatic access to the Rhesis testing platform:
 - **Access Test Sets**: Browse and load curated test sets across multiple domains and use cases
 - **Generate Test Scenarios**: Create custom test sets from prompts, requirements, or domain knowledge natively using local LLM models
 - **Execute Test Runs**: Trigger test set runs against your endpoints in parallel or sequential mode
-- **Analytics & Stats**: Typed stats for test runs and test results — pass rates by metric, behavior, category, topic, and timeline trends
+- **Analytics & Stats**: Typed stats for test runs and test results — pass rates by metric, requirement, category, topic, and timeline trends
 - **Manage Metrics & Tests**: Add/remove metrics on test sets, associate/disassociate tests, rescore previous runs
 - **Seamless Integration**: Integrate testing into your Java CI/CD pipeline and development workflow
 - **Comprehensive Coverage**: Scale your testing from dozens to thousands of scenarios
@@ -259,7 +259,7 @@ public class Main {
 
 ### Generating Custom Test Sets 🛠️
 
-If none of the existing test sets fit your needs, you can generate your own. You can check out [app.rhesis.ai](http://app.rhesis.ai). There you can define requirements, scenarios and behaviors.
+If none of the existing test sets fit your needs, you can generate your own. You can check out [app.rhesis.ai](http://app.rhesis.ai). There you can define requirements, scenarios and test configurations.
 
 ### Examples 💡
 
@@ -284,7 +284,7 @@ Looking for more detailed examples? Check out the full [Examples README](src/tes
 
 **Analytics & Stats**
 - [Test Run Stats](src/test/java/ai/rhesis/sdk/examples/TestRunStatsExample.java) — Overall summary, status distribution, most-run test sets, timeline, filtered queries
-- [Test Result Stats](src/test/java/ai/rhesis/sdk/examples/TestResultStatsExample.java) — Pass rates by metric, behavior, category, and topic; per-run summaries and timeline trends
+- [Test Result Stats](src/test/java/ai/rhesis/sdk/examples/TestResultStatsExample.java) — Pass rates by metric, requirement, category, and topic; per-run summaries and timeline trends
 
 You can run any example from the command line using Maven. Make sure your `RHESIS_API_KEY` is set in your environment (it will be automatically picked up from a `.env` file at the root of the project if one exists):
 

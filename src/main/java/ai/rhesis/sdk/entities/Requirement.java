@@ -5,16 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Map;
 
-public record Behavior(
+public record Requirement(
     @JsonProperty("id") String id,
     @NotBlank @JsonProperty("name") String name,
     @JsonProperty("description") String description,
     @JsonProperty("metadata") Map<String, Object> metadata)
-    implements BaseEntity<Behavior> {
+    implements BaseEntity<Requirement> {
 
   @JsonIgnore
   @Override
   public String getEndpointPath() {
-    return "/behaviors";
+    return "/requirements";
   }
 }

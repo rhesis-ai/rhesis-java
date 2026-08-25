@@ -54,7 +54,7 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
   private List<Test> generateBatch(int currentBatchSize) {
     Map<String, Object> context = new HashMap<>();
     context.put("generation_prompt", config.getGenerationPrompt());
-    context.put("behaviors", config.getBehaviors());
+    context.put("requirements", config.getRequirements());
     context.put("categories", config.getCategories());
     context.put("topics", config.getTopics());
     context.put("additional_context", config.getAdditionalContext());
@@ -98,7 +98,7 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
           new Test(
               null,
               testConfig,
-              (String) flat.get("behavior"),
+              (String) flat.get("requirement"),
               (String) flat.get("category"),
               (String) flat.get("topic"),
               TestType.MULTI_TURN,
@@ -113,7 +113,7 @@ public class MultiTurnSynthesizer extends BaseSynthesizer {
   public String getRenderedPrompt() {
     Map<String, Object> context = new HashMap<>();
     context.put("generation_prompt", config.getGenerationPrompt());
-    context.put("behaviors", config.getBehaviors());
+    context.put("requirements", config.getRequirements());
     context.put("categories", config.getCategories());
     context.put("topics", config.getTopics());
     context.put("additional_context", config.getAdditionalContext());
