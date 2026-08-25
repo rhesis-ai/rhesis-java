@@ -7,6 +7,7 @@ import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.clients.*;
 import ai.rhesis.sdk.entities.File;
 import ai.rhesis.sdk.entities.InsightsIdsResponse;
+import ai.rhesis.sdk.entities.InsightsQuery;
 import ai.rhesis.sdk.entities.InsightsResponse;
 import ai.rhesis.sdk.entities.TestResult;
 import ai.rhesis.sdk.entities.TestRun;
@@ -499,6 +500,79 @@ class ClientWiremockTest {
     InsightsResponse response = insightsClient.get("test_run", List.of());
     assertThat(response.entity()).isEqualTo("test_run");
     assertThat(response.rows()).isEmpty();
+  }
+
+  @Test
+  void testInsightsQueryWithDateRange() {
+    stubFor(
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_result"))
+            .withQueryParam("measures", equalTo("count"))
+            .withQueryParam("months", equalTo("6"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"entity\":\"test_result\","
+                            + "\"dimensions\":[],"
+                            + "\"measures\":[\"count\"],"
+                            + "\"rows\":[{\"count\":42}]}")));
+
+    InsightsQuery query =
+        InsightsQuery.builder("test_result").measures(List.of("count")).months(6).build();
+    InsightsResponse response = insightsClient.get(query);
+    assertThat(response.rows()).hasSize(1);
+    assertThat(response.rows().get(0)).containsEntry("count", 42);
+  }
+
+  @Test
+  void testInsightsQueryWithStartEndDate() {
+    stubFor(
+        get(urlPathEqualTo("/insights/"))
+            .withQueryParam("entity", equalTo("test_run"))
+            .withQueryParam("measures", equalTo("count"))
+            .withQueryParam("start_date", equalTo("2026-01-01"))
+            .withQueryParam("end_date", equalTo("2026-06-30"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"entity\":\"test_run\","
+                            + "\"dimensions\":[],"
+                            + "\"measures\":[\"count\"],"
+                            + "\"rows\":[{\"count\":7}]}")));
+
+    InsightsQuery query =
+        InsightsQuery.builder("test_run")
+            .measures(List.of("count"))
+            .startDate("2026-01-01")
+            .endDate("2026-06-30")
+            .build();
+    InsightsResponse response = insightsClient.get(query);
+    assertThat(response.rows().get(0)).containsEntry("count", 7);
+  }
+
+  @Test
+  void testInsightsIdsWithQuery() {
+    stubFor(
+        get(urlPathEqualTo("/insights/ids"))
+            .withQueryParam("entity", equalTo("test_result"))
+            .withQueryParam("outcome", equalTo("fail"))
+            .withQueryParam("months", equalTo("3"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"entity\":\"test_result\"," + "\"ids\":[\"id-1\"]}")));
+
+    InsightsQuery query = InsightsQuery.builder("test_result").months(3).build();
+    InsightsIdsResponse response = insightsClient.ids(query, "fail");
+    assertThat(response.ids()).containsExactly("id-1");
   }
 
   @Test
