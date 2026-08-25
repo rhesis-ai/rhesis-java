@@ -49,11 +49,11 @@ public class ConfigSynthesizer extends BaseSynthesizer {
       generatedTests.addAll(generateSingleTurnBatch(renderedPrompt));
     }
 
-    return new TestSet(
-        null,
-        "Synthesized TestSet",
-        "Generated with ConfigSynthesizer",
-        TestType.SINGLE_TURN,
-        generatedTests);
+    String name = config.getTestSetName() != null ? config.getTestSetName() : "Synthesized TestSet";
+    String description =
+        config.getTestSetDescription() != null
+            ? config.getTestSetDescription()
+            : "Generated with ConfigSynthesizer";
+    return new TestSet(null, name, description, TestType.SINGLE_TURN, generatedTests);
   }
 }

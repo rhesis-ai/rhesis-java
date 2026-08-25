@@ -66,11 +66,11 @@ public class ContextSynthesizer extends BaseSynthesizer {
       generatedTests.addAll(generateSingleTurnBatch(renderedPrompt));
     }
 
-    return new TestSet(
-        null,
-        "Synthesized TestSet",
-        "Generated with ContextSynthesizer",
-        TestType.SINGLE_TURN,
-        generatedTests);
+    String name = config.getTestSetName() != null ? config.getTestSetName() : "Synthesized TestSet";
+    String description =
+        config.getTestSetDescription() != null
+            ? config.getTestSetDescription()
+            : "Generated with ContextSynthesizer";
+    return new TestSet(null, name, description, TestType.SINGLE_TURN, generatedTests);
   }
 }

@@ -80,7 +80,7 @@ Replace the class name with any example listed below.
 | Example | Description |
 |---------|-------------|
 | `ExecuteTestSetExample` | Trigger a test set run against an endpoint — parallel mode, sequential mode, and with custom metrics. |
-| `TestRunWorkflowExample` | Full lifecycle: list runs, inspect results, fetch stats, get last run, and rescore. |
+| `TestRunWorkflowExample` | Full lifecycle: list runs, inspect results, get insights, get last run, and rescore. |
 
 ### Test Set Management
 
@@ -88,12 +88,12 @@ Replace the class name with any example listed below.
 |---------|-------------|
 | `TestSetMetricsExample` | List, add, and remove metrics on a test set. Associate and disassociate tests. |
 
-### Analytics & Stats
+### Insights
 
 | Example | Description |
 |---------|-------------|
-| `TestRunStatsExample` | Test run analytics: overall summary, status distribution, most-run test sets, timeline, filtering by mode/months/run IDs. |
-| `TestResultStatsExample` | Test result analytics: pass rates by metric, requirement, category, and topic. Timeline trends, per-run summaries, and filtered queries. |
+| `TestRunStatsExample` | Test run insights: counts by status, date range filtering with months and start/end dates. |
+| `TestResultStatsExample` | Test result insights: pass rates by requirement, category, and topic. Date range queries and failed test result ID retrieval. |
 
 ## Quick Reference
 
@@ -103,17 +103,36 @@ RhesisClient client = RhesisClient.builder()
     .apiKey(System.getenv("RHESIS_API_KEY"))
     .build();
 
+// Generate a named test set
+GenerationConfig config = GenerationConfig.builder()
+    .generationPrompt("Test a customer support chatbot")
+    .testSetName("Support Bot Safety Tests")
+    .testSetDescription("Adversarial tests for the support chatbot")
+    .requirements(List.of("Refuses harmful requests", "Stays on topic"))
+    .build();
+TestSet testSet = new MultiTurnSynthesizer(config).generate(10);
+client.testSets().create(testSet);
+
+// Rename an existing test set
+TestSet existing = client.testSets().get(testSetId);
+TestSet renamed = existing.toBuilder().name("New Name").build();
+client.testSets().update(renamed);
+
 // Execute a test set
 Map<String, Object> result = client.testSets()
     .execute(testSetId, endpointId);
 
-// Get test run stats
-TestRunStats stats = client.testRuns().stats();
-System.out.println("Pass rate: " + stats.overallSummary().passRate() + "%");
+// Get insights (replaces stats)
+InsightsResponse insights = client.insights()
+    .get("test_result", List.of("requirement"), List.of("count", "pass_rate"), null);
 
-// Get test result stats by requirement
-TestResultStats requirementStats = client.testResults()
-    .stats(TestResultStatsMode.REQUIREMENT);
+// Get insights with date range
+InsightsQuery query = InsightsQuery.builder("test_result")
+    .groupBy(List.of("category"))
+    .measures(List.of("count"))
+    .months(6)
+    .build();
+InsightsResponse recent = client.insights().get(query);
 
 // Get last completed run
 TestRun lastRun = client.testSets()

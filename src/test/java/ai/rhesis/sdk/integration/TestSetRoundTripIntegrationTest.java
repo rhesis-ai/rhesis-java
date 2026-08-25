@@ -145,6 +145,88 @@ class TestSetRoundTripIntegrationTest extends BaseIntegrationTest {
         .containsEntry("priority", 7);
   }
 
+  @org.junit.jupiter.api.Test
+  @DisplayName("test set name can be updated via toBuilder and update")
+  void testSetNameCanBeUpdated() {
+    String suffix = UUID.randomUUID().toString().substring(0, 8);
+
+    Test test =
+        Test.builder()
+            .requirement("Reliability")
+            .category("Functionality")
+            .topic("Naming")
+            .testType(TestType.SINGLE_TURN)
+            .prompt(
+                ai.rhesis.sdk.entities.Prompt.builder()
+                    .content("Does update work?")
+                    .expectedResponse("Yes")
+                    .languageCode("en")
+                    .build())
+            .build();
+
+    TestSet toCreate =
+        TestSet.builder()
+            .name("Original Name [" + suffix + "]")
+            .description("Original description")
+            .testSetType(TestType.SINGLE_TURN)
+            .tests(List.of(test))
+            .build();
+
+    TestSet created = client.testSets().create(toCreate);
+    createdTestSetId = created.id();
+
+    TestSet fetched = client.testSets().get(created.id());
+    assertThat(fetched.name()).isEqualTo("Original Name [" + suffix + "]");
+
+    TestSet renamed = fetched.toBuilder().name("Updated Name [" + suffix + "]").build();
+    TestSet updated = client.testSets().update(renamed);
+
+    assertThat(updated.name()).isEqualTo("Updated Name [" + suffix + "]");
+    assertThat(updated.description()).isEqualTo("Original description");
+
+    TestSet refetched = client.testSets().get(created.id());
+    assertThat(refetched.name()).isEqualTo("Updated Name [" + suffix + "]");
+  }
+
+  @org.junit.jupiter.api.Test
+  @DisplayName("test set name and description round-trip through create and get")
+  void testSetNameSurvivesRoundTrip() {
+    String suffix = UUID.randomUUID().toString().substring(0, 8);
+    String name = "Custom Named TestSet [" + suffix + "]";
+    String description = "Integration test for test set naming [" + suffix + "]";
+
+    Test test =
+        Test.builder()
+            .requirement("Reliability")
+            .category("Functionality")
+            .topic("Naming")
+            .testType(TestType.SINGLE_TURN)
+            .prompt(
+                ai.rhesis.sdk.entities.Prompt.builder()
+                    .content("Does naming work?")
+                    .expectedResponse("Yes")
+                    .languageCode("en")
+                    .build())
+            .build();
+
+    TestSet toCreate =
+        TestSet.builder()
+            .name(name)
+            .description(description)
+            .testSetType(TestType.SINGLE_TURN)
+            .tests(List.of(test))
+            .build();
+
+    TestSet created = client.testSets().create(toCreate);
+    assertThat(created).isNotNull();
+    assertThat(created.id()).isNotBlank();
+    createdTestSetId = created.id();
+
+    TestSet fetched = client.testSets().get(created.id());
+    assertThat(fetched.name()).isEqualTo(name);
+    assertThat(fetched.description()).isEqualTo(description);
+  }
+
   private static Test findByGoal(List<Test> tests, String goal) {
     return tests.stream()
         .filter(t -> t.testConfiguration() != null && goal.equals(t.testConfiguration().goal()))

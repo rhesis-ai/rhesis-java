@@ -38,6 +38,13 @@ public class TestSetClient {
         new TypeReference<List<ai.rhesis.sdk.entities.Test>>() {});
   }
 
+  public TestSet update(TestSet testSet) {
+    if (testSet.id() == null) {
+      throw new IllegalArgumentException("Cannot update a TestSet without an ID");
+    }
+    return httpClient.put("/test_sets/" + testSet.id(), testSet, TestSet.class);
+  }
+
   public void delete(String id) {
     httpClient.delete("/test_sets/" + id);
   }

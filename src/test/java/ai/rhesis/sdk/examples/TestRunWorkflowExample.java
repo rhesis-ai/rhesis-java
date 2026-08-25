@@ -2,10 +2,10 @@ package ai.rhesis.sdk.examples;
 
 import ai.rhesis.sdk.RhesisClient;
 import ai.rhesis.sdk.entities.Endpoint;
+import ai.rhesis.sdk.entities.InsightsResponse;
 import ai.rhesis.sdk.entities.TestResult;
 import ai.rhesis.sdk.entities.TestRun;
 import ai.rhesis.sdk.entities.TestSet;
-import ai.rhesis.sdk.entities.stats.TestRunStats;
 import ai.rhesis.sdk.exceptions.RhesisApiException;
 import java.util.List;
 import java.util.Map;
@@ -38,22 +38,12 @@ public class TestRunWorkflowExample {
       }
     }
 
-    // --- Get test run stats ---
-    System.out.println("\n=== Test Run Stats ===");
-    TestRunStats stats = client.testRuns().stats();
-    if (stats.overallSummary() != null) {
-      System.out.println("Total runs: " + stats.overallSummary().totalRuns());
-      System.out.println("Pass rate: " + stats.overallSummary().passRate());
-      System.out.println("Unique test sets: " + stats.overallSummary().uniqueTestSets());
-    }
-
-    // Stats scoped to specific runs
-    if (!runs.isEmpty()) {
-      System.out.println("\n=== Stats for first run ===");
-      TestRunStats scopedStats = client.testRuns().stats(List.of(runs.get(0).id()));
-      if (scopedStats.overallSummary() != null) {
-        System.out.println("Scoped pass rate: " + scopedStats.overallSummary().passRate());
-      }
+    // --- Get test run insights ---
+    System.out.println("\n=== Test Run Insights ===");
+    InsightsResponse insights =
+        client.insights().get("test_run", List.of("status"), List.of("count"), null);
+    for (Map<String, Object> row : insights.rows()) {
+      System.out.printf("  %-15s count=%s%n", row.get("status"), row.get("count"));
     }
 
     // --- Last run for a test set + endpoint pair ---

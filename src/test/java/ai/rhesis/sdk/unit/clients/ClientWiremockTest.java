@@ -89,6 +89,61 @@ class ClientWiremockTest {
   }
 
   @Test
+  void testUpdateTestSet() {
+    stubFor(
+        put(urlEqualTo("/test_sets/ts-123"))
+            .withHeader("Authorization", equalTo("Bearer test-key"))
+            .withRequestBody(matchingJsonPath("$.name", equalTo("Renamed TestSet")))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"id\":\"ts-123\",\"name\":\"Renamed TestSet\","
+                            + "\"test_set_type\":\"Multi-Turn\"}")));
+
+    TestSet toUpdate =
+        TestSet.builder()
+            .id("ts-123")
+            .name("Renamed TestSet")
+            .testSetType(TestType.MULTI_TURN)
+            .build();
+    TestSet response = testSetClient.update(toUpdate);
+    assertThat(response.id()).isEqualTo("ts-123");
+    assertThat(response.name()).isEqualTo("Renamed TestSet");
+  }
+
+  @Test
+  void testUpdateTestSetViaToBuilder() {
+    stubFor(
+        get(urlEqualTo("/test_sets/ts-456"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"id\":\"ts-456\",\"name\":\"Old Name\","
+                            + "\"description\":\"Old Desc\",\"test_set_type\":\"Single-Turn\"}")));
+    stubFor(
+        put(urlEqualTo("/test_sets/ts-456"))
+            .withRequestBody(matchingJsonPath("$.name", equalTo("New Name")))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"id\":\"ts-456\",\"name\":\"New Name\","
+                            + "\"description\":\"Old Desc\",\"test_set_type\":\"Single-Turn\"}")));
+
+    TestSet existing = testSetClient.get("ts-456");
+    TestSet renamed = existing.toBuilder().name("New Name").build();
+    TestSet response = testSetClient.update(renamed);
+
+    assertThat(response.name()).isEqualTo("New Name");
+    assertThat(response.description()).isEqualTo("Old Desc");
+  }
+
+  @Test
   void testGetTestRun() {
     stubFor(
         get(urlEqualTo("/test_runs/tr-1"))
