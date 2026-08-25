@@ -36,7 +36,7 @@ docker-up:
 	@echo "Seeding project scope on test token..."
 	@docker compose -f docker-compose.test.yml exec -T test-postgres \
 		psql -U rhesis-user -d rhesis-db -c \
-		"UPDATE tokens SET project_id = (SELECT id FROM projects LIMIT 1);"
+		"UPDATE token SET project_id = (SELECT id FROM project LIMIT 1);"
 
 docker-down:
 	docker compose -f docker-compose.test.yml down
